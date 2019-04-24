@@ -221,13 +221,23 @@ public class ExamSet : IComparable<ExamSet> {
 			mWAvg += maxScore*weight;
 			sumWeight += weight;
 		}
-		wAvg /= sumWeight; mWAvg /= sumWeight;
-		double score_ = getBaseScore(sbjMaxScore, totScore, maxTotScore);
-		score_ *= calcSumEffect(wAvg, mWAvg, value);
-		score_ *= calcDisperEffect();
-		score_ = calcFuncEffect(score_, sbjMaxScore);
-		int res = Mathf.RoundToInt((float)score_);
-		e.setSubFinalScore(sid,res);
+        Debug.Log("sid = " + sid + ", value = " + value);
+        wAvg /= sumWeight; mWAvg /= sumWeight;
+        mWAvg *= (1 - difficulty) * 2;
+        Debug.Log("wAvg = " + wAvg + ", mWAvg = " + mWAvg);
+        double score_ = getBaseScore(sbjMaxScore, totScore, maxTotScore);
+        Debug.Log("base_score = " + score_);
+        double rate;
+        score_ *= (rate = calcSumEffect(wAvg, mWAvg, value));
+        Debug.Log("rate_sum = "+rate);
+        score_ *= (rate = calcDisperEffect());
+        Debug.Log("rate_disper = " + rate);
+        score_ = calcFuncEffect(score_, sbjMaxScore);
+        Debug.Log("temp_score = " + score_);
+        int res = Mathf.RoundToInt((float)score_);
+        Debug.Log("result = " + res);
+        Debug.Log("=============================");
+        e.setSubFinalScore(sid,res);
 		return res;
 	}
 	double getBaseScore(int sbjMaxScore, double totScore, double maxTotScore){
@@ -241,8 +251,10 @@ public class ExamSet : IComparable<ExamSet> {
 	}
 	double calcSumEffect(double wAvg, double mWAvg, int value){
 		double rate1 = calcAvgScoreEffect(wAvg, mWAvg);
-		double rate2 = calcValueEffect(value);
-		return rate1*(1-dependence)+rate2*dependence;
+        Debug.Log("rate1 = " + rate1);
+        double rate2 = calcValueEffect(value);
+        Debug.Log("rate2 = " + rate2);
+        return rate1*(1-dependence)+rate2*dependence;
 	}
 	double calcDisperEffect(){
 		return UnityEngine.Random.Range(100-Dispersion, 100+Dispersion)/100.0;
