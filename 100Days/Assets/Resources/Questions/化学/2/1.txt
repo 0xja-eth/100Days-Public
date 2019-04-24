@@ -1,0 +1,8 @@
+﻿TIT: 设NA为阿伏加德罗常数的数值，下列说法正确的是
+CHO:
+A.标准状况下，2.24 LCH2Cl2 中所含C- Cl键的数目为0.2NA
+B.l.0mol/L的CH3COONa溶液中所含CH3COO-的数目小于NA
+C.1mol硝基(-NO2)与46g二氧化氮(NO2)所含的电子数均为23NA
+D.将0.1molH2和0.2molI2充入密闭容器中充分反应后，生成HI的分子数为0.2NA
+
+ANS: C

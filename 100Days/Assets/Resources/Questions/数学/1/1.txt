@@ -1,0 +1,7 @@
+﻿TIT: 命题p:若x<0 ，则ln(x+1)<0；q是p的逆命题，则（   ）
+CHO:
+A．p真， q真
+B. p真，q 假
+C. p假， q真
+D．p假， q假
+ANS: C

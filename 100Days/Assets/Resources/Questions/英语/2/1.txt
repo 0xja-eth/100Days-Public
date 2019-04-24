@@ -1,0 +1,12 @@
+TIT: Ms Nancy didn't mind at all ______ to the ceremony.
+CHO:
+A. being not invited
+
+B. not being invited
+
+C. not inviting
+
+D. not to be invited 
+
+ANS: B
+DES: 无

@@ -1,0 +1,12 @@
+TIT: "_____ your meeting is!" he offered them his sincere congratulations.
+CHO:
+A. How a great success
+
+B. What a great success
+
+C. How great success
+
+D. What great success
+
+ANS: B
+DES: success 名词，保留远动词含义“成功”是不可数名词；如用来代替具体的人（成功者）或具体的事（成功的事情（东西））是可数名词。故排除C、D；A中how是副词，如改成how great a success就是正确的。
