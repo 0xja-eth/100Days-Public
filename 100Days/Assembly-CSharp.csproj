@@ -72,12 +72,14 @@
     <Compile Include="Assets\Scripts\Entities\QuestionDisplayer.cs" />
     <Compile Include="Assets\Scripts\Modules\DataSystem.cs" />
     <Compile Include="Assets\Scripts\Modules\Exam.cs" />
+    <Compile Include="Assets\Scripts\Modules\ExamSet.cs" />
     <Compile Include="Assets\Scripts\Modules\Exercise.cs" />
     <Compile Include="Assets\Scripts\Modules\GameSystem.cs" />
     <Compile Include="Assets\Scripts\Modules\Player.cs" />
     <Compile Include="Assets\Scripts\Modules\Question.cs" />
     <Compile Include="Assets\Scripts\Modules\QuestionSet.cs" />
     <Compile Include="Assets\Scripts\Modules\RecordSystem.cs" />
+    <Compile Include="Assets\Scripts\Modules\StorageSystem.cs" />
     <Compile Include="Assets\Scripts\Modules\Subject.cs" />
     <None Include="Assets\Resources\Questions\物理\4\1.txt" />
     <None Include="Assets\Resources\Questions\历史\3\1.txt" />

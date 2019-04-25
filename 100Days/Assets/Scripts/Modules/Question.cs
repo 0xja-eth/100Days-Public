@@ -3,6 +3,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public class QuestionJsonData {
+    public int id;
+    public string title;       
+    public int level;          
+    public string description; 
+    public int score;          
+    public int type;          
+    public int subjectId;      
+    public Question.QuestionChoice[] choices;
+    //public Question.QuestionStatistics stat;
+}
+
+[System.Serializable]
+public class QuestionStatJsonData {
+    public int id;
+    public int count;         
+    public int crtCnt;        
+    public string lastDate; 
+    public long lastTime; 
+    public long avgTime;
+}
+
 //注： crt 为 correct 缩写
 public class Question : IComparable<Question> {
 	public enum Type{ Single, Multiple, Judgment, Others };
@@ -106,7 +129,8 @@ public class Question : IComparable<Question> {
 		return score;
 	}
 
-	public class QuestionChoice {
+    [System.Serializable]
+    public class QuestionChoice {
 		public string	text;	// 选项文本
 		public bool		answer;	// 是否正确答案
 		public QuestionChoice(string text, bool answer=false){
@@ -114,7 +138,7 @@ public class Question : IComparable<Question> {
 		}
 	}
 
-	public class QuestionStatistics {
+    public class QuestionStatistics {
 		public int count;			// 做题次数
 		public int crtCnt;			// 正确次数
 		public DateTime lastDate;	// 上次做题日期
@@ -139,8 +163,56 @@ public class Question : IComparable<Question> {
 			avgTime = new TimeSpan(tick);
 		}
 	}
+    
+    public string toJson() {
+        return JsonUtility.ToJson(toJsonData());
+    }
+    public QuestionJsonData toJsonData() {
+        QuestionJsonData data = new QuestionJsonData();
+        data.id = id;
+        data.title = title;
+        data.level = level;
+        data.description = description;
+        data.score = score;
+        data.type = (int)type;
+        data.subjectId = subjectId;
+        data.choices = choices.ToArray();
+        //data.stat = stat;
+        return data;
+    }
+    public bool fromJsonData(QuestionJsonData data) {
+        id = data.id;
+        title = data.title;
+        level = data.level;
+        description = data.description;
+        score = data.score;
+        type = (Type)data.type;
+        subjectId = data.subjectId;
+        choices = new List<QuestionChoice>(data.choices);
+        //stat = data.stat;
+        return true;
+    }
+    public QuestionStatJsonData getStatData() {
+        QuestionStatJsonData data = new QuestionStatJsonData();
+        data.id = id;
+        data.count = stat.count;
+        data.crtCnt = stat.crtCnt;
+        data.lastDate = stat.lastDate.ToString();
+        data.lastTime = stat.lastTime.Ticks;
+        data.avgTime = stat.avgTime.Ticks;
+        return data;
+    }
+    public bool loadStatData(QuestionStatJsonData data) {
+        stat = new QuestionStatistics();
+        stat.count = data.count;
+        stat.crtCnt = data.crtCnt;
+        stat.lastDate = Convert.ToDateTime(data.lastDate);
+        stat.lastTime = new TimeSpan(data.lastTime);
+        stat.avgTime = new TimeSpan(data.avgTime);
+        return true;
+    }
 
-	public Question(string title, int level, string desc, 
+    public Question(string title, int level, string desc, 
 		int score, int sid, Type type=Type.Single){
         this.id = ++ID;
         this.title = title;

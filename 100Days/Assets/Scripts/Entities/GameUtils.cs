@@ -17,7 +17,7 @@ public static class GameUtils {
 	public static void initialize(){
 		objectFinder = GameObject.Find("ObjectFinder").transform;
 		camera = find<Transform>("MainCamera");
-		alertWindow = find<Transform>("Canvas2D/AlertWindow");
+		alertWindow = find<Transform>("Canvas2D/PromptLayer/AlertWindow");
 		cameraControl = get<CameraControl>(camera);
 		alertLayer = get<AlertLayer>(alertWindow);
 	}

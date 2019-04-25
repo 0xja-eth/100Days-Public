@@ -2,6 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public class SubjectJsonData {
+    public int id;      
+    public string name; 
+    public int value; 	
+}
+
 public class Subject {
 	int id;			// 科目代号
 	string name;	// 科目名
@@ -30,17 +37,37 @@ public class Subject {
 	public string getName() {return name;}
 	public int getValue() {return value;}
 
-	public Subject(int id, string name) {
+    public SubjectJsonData toJsonData() {
+        SubjectJsonData data = new SubjectJsonData();
+        data.id = id;
+        data.name = name;
+        data.value = value;
+        return data;
+    }
+    public bool fromJsonData(SubjectJsonData data) {
+        id = data.id;
+        name = data.name;
+        value = data.value;
+        return true;
+    }
+
+    public Subject(int id, string name) {
 		this.id = id; this.name = name;
 		resetPoint();
 	}
+    public Subject(SubjectJsonData data) {
+        fromJsonData(data);
+    }
 
-	public void resetPoint(){value = 0;}
+	public void resetPoint(){ setPoint(0); }
 
-	public void addPoint(int value){
-		this.value += value;
-	}
-	public void addPoint(Subject s){
+    public void setPoint(int value) {
+        this.value = value;
+    }
+    public void addPoint(int value) {
+        this.value += value;
+    }
+    public void addPoint(Subject s){
 		if(this.id != s.id) return;
 		addPoint(s.value);
 	}
@@ -48,7 +75,8 @@ public class Subject {
 		this.value = Mathf.RoundToInt((float)(this.value*(1-rate)));
 	}
 
-	public static Subject getStandardSubject(int id) {
+
+    public static Subject getStandardSubject(int id) {
 		return new Subject(id, SubjectName[id]);
 	}
 

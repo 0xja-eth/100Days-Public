@@ -114,17 +114,17 @@ public static class DataSystem {
 
         //string input = "选出下列加点字注音全对的一项（）\nA．吮吸(shǔn) 涎皮（yán） 敕造（chì） 百无聊赖(lài)\nB．讪讪(shàn) 庠序（xiáng） 俨然(yǎn) 少不更事(jīng)\nC．折本（shé） 干瘪（biě) 谬种(miù) 沸反盈天(fèi)\nD．蹙缩（cù） 驯熟(xùn) 两靥（yàn） 鸡豚狗彘（zhì）\n\n解析：C\n无";
         string input = file.text;
-        Debug.Log("Loading: " + path);
-
+        //
         if (input == "") {
+            Debug.Log("Loading: " + path);
             Debug.Log("无效数据！");
             return false;
         }
-        Debug.Log("源数据：\n" + input); // 选项不能有换行
+        //Debug.Log("源数据：\n" + input); // 选项不能有换行
         // 预处理（规范化） → 正则表达式
         if (input.IndexOf("DES: ") == -1) input += "\nDES: 无";
         //input = Regex.Replace(input, @"(?<str>\w)([．. ]+)", "\n${str}. ");
-        Debug.Log("规范化：\n" + input);
+        //Debug.Log("规范化：\n" + input);
         /*byte[] bytes = file.bytes;
          string input = System.Text.Encoding.UTF8.GetString(bytes);
          */
@@ -184,24 +184,15 @@ public static class DataSystem {
         answerArr = new List<int>();
 
         bool success = false;// && reg2.IsMatch(input);
-        Debug.Log(reg.IsMatch(input));
         foreach (Match match in reg.Matches(input)) {
             title = match.Groups[1].Value;
             choices = match.Groups[2].Value;
             answers = match.Groups[3].Value;
             desc = match.Groups[4].Value;
-            Debug.Log("title: " + title);
-            Debug.Log("choices: " + choices);
-            Debug.Log("answers: " + answers);
-            Debug.Log("desc: " + desc);
-            foreach (Match choice in creg.Matches(choices)) {
+            foreach (Match choice in creg.Matches(choices)) 
                 choiceArr.Add(choice.Groups[1].Value);
-                Debug.Log("choice: " + choice.Groups[1].Value);
-            }
-            foreach (Match answer in areg.Matches(answers)) {
+            foreach (Match answer in areg.Matches(answers)) 
                 answerArr.Add(answer.Groups[1].Value[0] - 'A');
-                Debug.Log("answer: " + answer.Groups[1].Value);
-            }
 
             Question.Type type = answerArr.Count > 1 ?
                 Question.Type.Multiple : Question.Type.Single;
@@ -209,7 +200,6 @@ public static class DataSystem {
             Question q = addQuestion(title, l, desc, Question.DefaultScore, s, type);
             foreach (string c in choiceArr) q.addChoice(c);
             foreach (int a in answerArr) q.changeChoiceAnswer(a);
-            Debug.Log("Success!");
             success = true;
         }
         return success;
@@ -348,11 +338,16 @@ public static class DataSystem {
 	
 	public static int getQuestionCount(){
 		return questions.Count;
-	}
-	public static Question getQuestion(int qid){
-		return questions[qid];
-	}
-	public static int getQuestion(int sid, Player p, 
+    }
+    public static Question getQuestion(int qid) {
+        return questions[qid];
+    }
+    public static Question getQuestionById(int qid) {
+        foreach (Question q in questions)
+            if (q.getId() == qid) return q;
+        return null;
+    }
+    public static int getQuestion(int sid, Player p, 
 		QuestionDistribution.Type type, int level=-1) {
 		return level < 0 ? getQuestionByType(sid, p, type) : 
 			getQuestionByLevel(sid, p, type, level);

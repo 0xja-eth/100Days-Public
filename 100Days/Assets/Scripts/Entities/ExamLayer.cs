@@ -39,7 +39,7 @@ public class ExamLayer : QuestionDisplayer {
     // Use this for initialization
     void Awake() {
         GameSystem.initialize();
-        GameSystem.createPlayer();
+        //GameSystem.createPlayer();
     }
 
     void Start() {
@@ -138,11 +138,13 @@ public class ExamLayer : QuestionDisplayer {
         if(examPointer >= examCount - 1){
             // 刷题完成
             examSet.terminate();
-            RecordSystem.recordExam(examSet);
+            RecordSystem.recordExamSet(examSet);
             //gameObject.SetActive(false);
             //disablePushButton();
             examResultLayer.setExamSet(examSet);
             player.showSubjectParams();
+
+            StorageSystem.saveGame();
         } else setExamPointer(examPointer + 1);
     }
 

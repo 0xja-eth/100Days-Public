@@ -3,6 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public class ExerciseJsonData : QuestionSetJsonData {
+    public ExerciseResultJsonData result;
+    public ExerciseJsonData(QuestionSetJsonData data) : base(data) { }
+}
+[System.Serializable]
+public class ExerciseResultJsonData {
+    public SubjectJsonData[] increment; 
+    public int score;
+    public int[][] selections;
+    public long[] spans;
+    public long totSpan;
+}
+
 public class Exercise : QuestionSet {
 	/*
 	Player		player;		// 玩家
@@ -46,11 +60,54 @@ public class Exercise : QuestionSet {
 		public TimeSpan		totSpan;	// 刷题时间
 	}
 
-	public Exercise(int count, int subjectId, 
+    public new ExerciseJsonData toJsonData() {
+        ExerciseJsonData data = new ExerciseJsonData(base.toJsonData());
+        data.result = getResultData();
+        return data;
+    }
+    public override bool fromJsonData(QuestionSetJsonData data) {
+        return fromJsonData((ExerciseJsonData)data);
+    }
+    public bool fromJsonData(ExerciseJsonData data) {
+        if (!base.fromJsonData(data)) return false;
+        return loadStatData(data.result);
+    }
+    public ExerciseResultJsonData getResultData() {
+        ExerciseResultJsonData data = new ExerciseResultJsonData();
+        int cnt = result.increment.Length;
+        data.score = result.score;
+        data.selections = result.selections;
+        data.totSpan = result.totSpan.Ticks;
+        data.increment = new SubjectJsonData[cnt];
+        for (int i = 0; i < cnt; i++)
+            data.increment[i] = result.increment[i].toJsonData();
+        cnt = result.spans.Length;
+        data.spans = new long[cnt];
+        for (int i = 0; i < cnt; i++)
+            data.spans[i] = result.spans[i].Ticks;
+        return data;
+    }
+    public bool loadStatData(ExerciseResultJsonData data) {
+        int cnt = data.increment.Length;
+        result = new ExerciseResult();
+        result.score = data.score;
+        result.selections = data.selections;
+        result.totSpan = new TimeSpan(data.totSpan);
+        result.increment = new Subject[cnt];
+        for (int i = 0; i < cnt; i++)
+            result.increment[i] = new Subject(data.increment[i]);
+        cnt = data.spans.Length;
+        result.spans = new TimeSpan[cnt];
+        for (int i = 0; i < cnt; i++)
+            result.spans[i] = new TimeSpan(data.spans[i]);
+        return true;
+    }
+
+    public Exercise(int count, int subjectId, 
 		DataSystem.QuestionDistribution.Type type, int[] levelDtb = null,
 		Player player = null, DateTime date = default(DateTime)):
 		base(count, subjectId, type, levelDtb, player, date) {
-		/*
+        /*
 		date = (date==default(DateTime) ? 
 			GameSystem.getCurDate() : date);
 		this.player = player ?? GameSystem.getPlayer();
@@ -61,9 +118,10 @@ public class Exercise : QuestionSet {
 		createQuestions();
 		initializeReault();
 		*/
-	}
+    }
+    public Exercise(ExerciseJsonData data, Player player = null) : base(data, player) { }
 
-	public override void terminate(){
+    public override void terminate(){
 		DateTime now = DateTime.Now;
 		TimeSpan span = now - startTime;
 		result.totSpan = span;

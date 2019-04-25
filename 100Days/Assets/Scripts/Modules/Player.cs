@@ -2,6 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public class PlayerJsonData {
+    public string name;            
+    public int maxEnergy, energy;  
+    public int[] subjectParams;
+    public int subjectSel;         
+    public double reduceRate;	   
+}
+
 public class Player {
 	string 		name;				// 玩家名字
 	int 		maxEnergy, energy;	// 最大精力，当前精力
@@ -16,14 +25,44 @@ public class Player {
 	public int getEnergy() {return energy;}
 	public int getMaxEnergy() {return maxEnergy;}
 
-	public Player(string name, int subjectsType){
-		energy = maxEnergy = DefaultMaxEnergy;
-		reduceRate = DefaultReduceRate;
-		selectSubject(subjectsType);
-		this.name = name;
-	}
+    public string toJson() {
+        return JsonUtility.ToJson(toJsonData());
+    }
+    public PlayerJsonData toJsonData() {
+        PlayerJsonData data = new PlayerJsonData();
+        int cnt = subjectParams.Length;
+        data.name = name;
+        data.maxEnergy = maxEnergy;
+        data.energy = energy;
+        data.subjectSel = subjectSel;
+        data.reduceRate = reduceRate;
+        data.subjectParams = new int[cnt];
+        for (int i = 0; i < cnt; i++)
+            data.subjectParams[i] = subjectParams[i].getValue();
+        return data;
+    }
+    public bool fromJsonData(PlayerJsonData data) {
+        name = data.name;
+        maxEnergy = data.maxEnergy;
+        energy = data.energy;
+        selectSubject(data.subjectSel);
+        int cnt = subjectParams.Length;
+        for (int i = 0; i < cnt; i++)
+            subjectParams[i].setPoint(data.subjectParams[i]);
+        return true;
+    }
 
-	public Subject getSubjectParam(int sid){
+    public Player(string name, int subjectsType) {
+        energy = maxEnergy = DefaultMaxEnergy;
+        reduceRate = DefaultReduceRate;
+        selectSubject(subjectsType);
+        this.name = name;
+    }
+    public Player(PlayerJsonData data) {
+        fromJsonData(data);
+    }
+
+    public Subject getSubjectParam(int sid){
 		foreach(Subject s in subjectParams)
 			if(s.getId() == sid) return s;
 		return null;
@@ -43,11 +82,6 @@ public class Player {
 	}
 	public void selectSubject(int sel){
 		subjectSel = sel;
-		Debug.Log(sel);
-		Debug.Log(Subject.DefaultSubjectsSet);
-		Debug.Log(Subject.DefaultSubjectsSet[sel]);
-		Debug.Log(Subject.DefaultSubjectsSet[sel].ToString());
-		Debug.Log(Subject.DefaultSubjectsSet[sel][4]);
 		subjectParams = Subject.getStandardSubjects(
 			Subject.DefaultSubjectsSet[sel]);
 	}

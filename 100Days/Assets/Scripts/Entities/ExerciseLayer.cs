@@ -33,7 +33,7 @@ public class ExerciseLayer : QuestionDisplayer {
     // Use this for initialization
     void Awake () {
 		GameSystem.initialize();
-		GameSystem.createPlayer();
+		//GameSystem.createPlayer();
 	}
 
 	void Start() {
@@ -99,6 +99,8 @@ public class ExerciseLayer : QuestionDisplayer {
                 gameObject.SetActive(false);
                 disableNextPageButton();
                 GameSystem.getPlayer().showSubjectParams();
+
+                StorageSystem.saveGame();
             }
             setPointer(quesPointer+1);
 			if(quesPointer>=quesCount-1)

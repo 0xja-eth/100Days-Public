@@ -3,6 +3,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public class QuestionSetJsonData {
+    public string date;     
+    public string startTime;
+    public int count;
+    public int subjectId;
+    public int[] questions;
+    public bool finished;
+    public QuestionSetJsonData(QuestionSetJsonData data=null) {
+        if (data == null) return;
+        date = data.date;
+        startTime = data.startTime;
+        count = data.count;
+        subjectId = data.subjectId;
+        questions = data.questions;
+        finished = data.finished;
+    }
+}
+
 public class QuestionSet : IComparable<QuestionSet> {
 	protected Player		player;		// 玩家
 	protected DateTime		date;		// 开始日期
@@ -33,6 +52,33 @@ public class QuestionSet : IComparable<QuestionSet> {
         return score;
     }
 
+    virtual public QuestionSetJsonData toJsonData() {
+        QuestionSetJsonData data = new QuestionSetJsonData();
+        int cnt = questions.Length;
+        data.date = date.ToString();
+        data.startTime = startTime.ToString();
+        data.count = count;
+        data.subjectId = subjectId;
+        data.questions = new int[cnt];
+        for (int i = 0; i < cnt; i++)
+            data.questions[i] = questions[i].getId();
+        data.finished = finished;
+        return data;
+    }
+    virtual public bool fromJsonData(QuestionSetJsonData data) {
+        int cnt = data.questions.Length;
+        date = Convert.ToDateTime(data.date);
+        startTime = Convert.ToDateTime(data.startTime);
+        count = data.count;
+        subjectId = data.subjectId;
+        questions = new Question[cnt];
+        for (int i = 0; i < cnt; i++)
+            questions[i] = DataSystem.getQuestionById(
+                data.questions[i]);
+        finished = data.finished;
+        return true;
+    }
+
     public QuestionSet(int count,  int subjectId, 
 		DataSystem.QuestionDistribution.Type type, int[] levelDtb = null,
 		Player player = null, DateTime date = default(DateTime)){
@@ -46,8 +92,13 @@ public class QuestionSet : IComparable<QuestionSet> {
 		createQuestions();
 		initializeResult();
 	}
+    
+    public QuestionSet(QuestionSetJsonData data, Player player = null) {
+        this.player = player ?? GameSystem.getPlayer();
+        fromJsonData(data);
+    }
 
-	int clacDtbCount(){
+    int clacDtbCount(){
 		int res = 0;
 		foreach(int c in this.levelDtb)
 			res += c;
