@@ -70,6 +70,16 @@ public static class GameUtils {
         return get<Button>(obj);
     }
 
+    public static Vector2 rectToSize(Rect r) {
+        return new Vector2(r.width, r.height);
+    }
+
+    public static void setRectWidth(RectTransform rt, float w) {
+        rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, w);
+    }
+    public static void setRectHeight(RectTransform rt, float h) {
+        rt.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, h);
+    }
     public static string time2Str(TimeSpan span) {
         return String.Format("{0:00}:{1:00}", Math.Floor(span.TotalMinutes), span.Seconds);
         /*

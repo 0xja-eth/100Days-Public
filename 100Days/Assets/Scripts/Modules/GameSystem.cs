@@ -42,6 +42,7 @@ public static class GameSystem {
     }
     public static bool fromJsonData(GameJsonData data) {
         if (version != data.version) return false;
+        Debug.Log("fromJsonData:" + data);
         player = new Player(data.player);
         RecordSystem.fromJsonData(data.record);
         curDate = Convert.ToDateTime(data.curDate);
@@ -85,8 +86,13 @@ public static class GameSystem {
         return player = new Player("俪菌俺", 1);
     }
 
+    public static int getDays() {
+        TimeSpan span = finalDate - curDate;
+        return span.Days;
+    }
+
 	public static void nextDay(){
-		curDate.AddDays(1);
+        curDate = curDate.AddDays(1);
 		player.recoveryEnergy();
 		player.reduceSubjectParams();
 	}

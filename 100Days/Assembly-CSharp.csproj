@@ -62,14 +62,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Entities\AlertLayer.cs" />
-    <Compile Include="Assets\Scripts\Entities\AnswerLayer.cs" />
-    <Compile Include="Assets\Scripts\Entities\CameraControl.cs" />
-    <Compile Include="Assets\Scripts\Entities\ExamLayer.cs" />
-    <Compile Include="Assets\Scripts\Entities\ExamResultLayer.cs" />
-    <Compile Include="Assets\Scripts\Entities\ExerciseLayer.cs" />
+    <Compile Include="Assets\Scripts\Entities\AnimatableLayer.cs" />
     <Compile Include="Assets\Scripts\Entities\GameUtils.cs" />
     <Compile Include="Assets\Scripts\Entities\LinkImageText.cs" />
-    <Compile Include="Assets\Scripts\Entities\QuestionDisplayer.cs" />
+    <Compile Include="Assets\Scripts\Entities\MainScene\QuestionLayer\AnswerLayer.cs" />
+    <Compile Include="Assets\Scripts\Entities\MainScene\QuestionLayer\CameraControl.cs" />
+    <Compile Include="Assets\Scripts\Entities\MainScene\QuestionLayer\ExamLayer.cs" />
+    <Compile Include="Assets\Scripts\Entities\MainScene\QuestionLayer\ExamResultLayer.cs" />
+    <Compile Include="Assets\Scripts\Entities\MainScene\QuestionLayer\ExerciseLayer.cs" />
+    <Compile Include="Assets\Scripts\Entities\MainScene\QuestionLayer\QuestionDisplayer.cs" />
+    <Compile Include="Assets\Scripts\Entities\MainScene\UILayer\DateLayer.cs" />
+    <Compile Include="Assets\Scripts\Entities\MainScene\UILayer\ExerciseConfigLayer.cs" />
+    <Compile Include="Assets\Scripts\Entities\MainScene\UILayer\MenuLayer.cs" />
+    <Compile Include="Assets\Scripts\Entities\MainScene\UILayer\ScheduleLayer.cs" />
+    <Compile Include="Assets\Scripts\Entities\MainScene\UILayer\UIBaseLayer.cs" />
     <Compile Include="Assets\Scripts\Modules\DataSystem.cs" />
     <Compile Include="Assets\Scripts\Modules\Exam.cs" />
     <Compile Include="Assets\Scripts\Modules\ExamSet.cs" />

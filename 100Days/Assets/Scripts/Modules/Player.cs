@@ -62,18 +62,27 @@ public class Player {
         fromJsonData(data);
     }
 
-    public Subject getSubjectParam(int sid){
-		foreach(Subject s in subjectParams)
-			if(s.getId() == sid) return s;
-		return null;
-	}
-	public int getSubjectParamValue(int sid){
-		return getSubjectParam(sid).getValue();
-	}
-	public void increaseSubjectParam(Subject inc){
+    public Subject getSubjectParam(int sid) {
+        foreach (Subject s in subjectParams)
+            if (s.getId() == sid) return s;
+        return null;
+    }
+    public int getSubjectParamValue(int sid) {
+        return getSubjectParam(sid).getValue();
+    }
+    public Subject getSubjectParamById(int id) {
+        return subjectParams[id];
+    }
+    public int getSubjectParamValueById(int id) {
+        return getSubjectParamById(id).getValue();
+    }
+    public void increaseSubjectParam(Subject inc){
 		Subject s = getSubjectParam(inc.getId());
 		if(s == null) return; s.addPoint(inc);
 	}
+    public int getSubjectCount() {
+        return subjectParams.Length;
+    }
 	public int[] getSubjectIds(){
 		return Subject.DefaultSubjectsSet[subjectSel];
 	}

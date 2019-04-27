@@ -5,15 +5,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 
-public class AlertLayer : MonoBehaviour {
+public class AlertLayer : AnimatableLayer {
 
-	int alertTextPaddingButtom = 24;
-	int okButtonPaddingButtom = 24;
-
-	float scaleSpeed = 0.2f;
-	float stopScaleDist = 0.02f;
-
-	public GameObject background;
+    const int alertTextPaddingButtom = 24;
+    const int okButtonPaddingButtom = 24;
 
 	public RectTransform alertText, buttons;
 	public RectTransform alertWindow;
@@ -21,54 +16,20 @@ public class AlertLayer : MonoBehaviour {
     public GameObject okButton, leftButton, rightButton;
 
     GameObject[] buttonObjs;
-    new string animation;
 
 	// Use this for initialization
 	void Awake () {
+        base.Awake();
     }
 	
 	void Start () {
+        base.Start();
     }
 
 	// Update is called once per frame
 	void Update () {
-		updateAnimation();
-		updateWindowSize();
-	}
-    
-
-	void updateAnimation(){
-		Vector3 ts;
-		switch(animation){
-			case "show":
-				ts = new Vector3(1,1,1);
-				transform.localScale += (ts-
-					transform.localScale)*scaleSpeed;
-				if(isAniStopping(ts)){
-					transform.localScale = ts;
-					stopAnimation();
-				}
-				break;
-			case "hide":
-				ts = new Vector3(0,0,0);
-				transform.localScale += (ts-
-					transform.localScale)*scaleSpeed;
-				if(isAniStopping(ts)){
-					transform.localScale = ts;
-					gameObject.SetActive(false);
-					background.SetActive(false);
-					stopAnimation();
-				}
-				break;
-		}
-	}
-
-	bool isAniStopping(Vector3 ts){
-		return Vector3.Distance(ts,transform.localScale)<stopScaleDist;
-	}
-
-	void stopAnimation(){
-		animation = null;
+        base.Update();
+        updateWindowSize();
 	}
 
 	void updateWindowSize(){
@@ -76,8 +37,9 @@ public class AlertLayer : MonoBehaviour {
 			alertTextPaddingButtom+buttons.rect.height+
 			okButtonPaddingButtom;
 
-		alertWindow.SetSizeWithCurrentAnchors(
-			RectTransform.Axis.Vertical, height);
+        GameUtils.setRectHeight(alertWindow, height);
+		//alertWindow.SetSizeWithCurrentAnchors(
+		//	RectTransform.Axis.Vertical, height);
 	}
 
     void resetButtons() {
@@ -116,13 +78,5 @@ public class AlertLayer : MonoBehaviour {
 		Text alert = GameUtils.text(alertText);
 		alert.text = text;
 	}
-
-	public void showWindow(){
-		background.SetActive(true);
-		gameObject.SetActive(true);
-		animation = "show";
-	}
-	public void hideWindow(){
-		animation = "hide";
-	}
+    
 }

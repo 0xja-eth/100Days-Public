@@ -364,8 +364,8 @@ public static class DataSystem {
 		}
 		return res;
 	}
-	// 获取可刷的最大难度
-	static int getMaxLevel(int value){
+    // 获取可刷的最大难度
+    public static int getMaxLevel(int value){
 		for(int i=0;i<Question.MaxLevel;i++)
 			if(value<Question.EntryValue[i])
 				return i-1;
