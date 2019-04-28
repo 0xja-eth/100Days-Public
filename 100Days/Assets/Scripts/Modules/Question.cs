@@ -49,8 +49,9 @@ public class Question : IComparable<Question> {
 	public static readonly int[] LevelWeight= {5,12,25,50,75,100};	// 每级初始基数
 	public static readonly int[] IncreBase 	= {3,6,15,35,75,100};	// 每级增益基数
 	public static readonly int[] EntryValue = {0,0,80,250,750,2000};// 科目点数等级限制
-	public static readonly int[] LevelMinute= {1,3,5,6,8,10};		// 难度标准时间
-	public const int DefaultScore = 6;		// 选择题分值
+    public static readonly int[] LevelMinute = { 1, 3, 5, 6, 8, 10 };       // 难度标准时间
+    public static readonly double[] LevelMinMinute = { 0.1, 0.3, 0.8, 1.2, 1.5, 1.5 };  // 难度最短时间
+    public const int DefaultScore = 6;		// 选择题分值
 	const double UnderSelectFactor = 0.5;	// 多选题少选得分因数
 
   	public int CompareTo(Question q) {
@@ -91,6 +92,8 @@ public class Question : IComparable<Question> {
 
 	// 是否做过
 	public bool haveOccurred() {return stat.count > 0;}
+	// 是否做过（结束后判断）
+	public bool haveOccurredWhenTerminated() {return stat.count > 1;}
 	// 是否做对过
 	public bool haveDone() {return stat.crtCnt > 0;}
 	public TimeSpan lastTimeDelta(DateTime date=default(DateTime)) {

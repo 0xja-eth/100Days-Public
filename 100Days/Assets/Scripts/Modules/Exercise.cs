@@ -30,29 +30,74 @@ public class Exercise : QuestionSet {
 
 	ExerciseResult result;	// 刷题结果
 
-	// 计算因数
-	public const double FactorA = 0.7;
-	public const int FactorK1 = 5;
-	public const int FactorK2 = 25;
-	public const double FactorC = 1;
-	public const double FactorW = 0.8;		
-	public const int Dispersion = 10;	// 增益离散度
+    static readonly string[][] FeelingTexts = {
+        new string[] { "感觉没什么提升...", "我是在做无用功吧？","可能得再做多一点题才有效果..."},
+        new string[] { "有一点提升，但是总觉得哪里不够...","慢慢进步，总会到达成功的！","这些题目可能效果一般啊~"},
+        new string[] { "不错不错，感觉良好。","稳步提升，下次考试能进前十吧？","有点意思~","挺不错的，明天继续！"},
+        new string[] { "提升了很多，感觉整个人都充实了。","学到了新知识！","很有意思，下次也要这样做！","太好了！又学到了新知识！"},
+        new string[] { "提升很大！再刷一套！","这样下去，下次考试就要考第一名了。怎么办？","爱上刷题了，每次都有那么大收获~"},
+        new string[] { "醍醐灌顶！","感觉打开了新世界的大门！","下次考试能考750！","清华北大等我~"}
+    };
+
+    // 计算因数
+    const double FactorA = 0.7;
+	const int FactorK1 = 5;
+	const int FactorK2 = 25;
+	const double FactorC = 1;
+	const double FactorW = 0.8;		
+	const int Dispersion = 10;	// 增益离散度
+    const double ShortTimeRate = 0.15;
 
   	public int CompareTo(Exercise e) {
   		return e.date.CompareTo(date);
     }
 
-	public Subject[] getIncr() {return finished ? result.increment : null;}
-	public int getScore() {return finished ? result.score : 0;}
-	public int[] getSelections(int id) {
+	public Subject[] getIncr() {return finished ? result.increment : null; }
+    public int getScore() { return finished ? result.score : 0; }
+    public int[] getSelections(int id) {
 		return finished ? result.selections[id] : null;
 	}
 	public TimeSpan getSpan(int id=-1) {
 		if(!finished) return default(TimeSpan);
 		return id == -1 ? result.totSpan : result.spans[id];
-	}
+    }
+    public int getCrtCnt() {
+        int res = 0;
+        for(int i = 0; i < questions.Length; i++) {
+            Question q = questions[i];
+            int[] sel = result.selections[i];
+            res += (q.isCorrect(sel) ? 1 : 0);
+        }
+        return res;
+    }
+    public int getNewQuestionCnt() {
+        int res = 0;
+        foreach (Question q in questions)
+            res += q.haveOccurredWhenTerminated() ? 0 : 1;
+        return res;
+    }
+    public int getEnergyCost() {
+        int res = 0;
+        foreach (Question q in questions)
+            res += q.getEnergyCost();
+        return res;
+    }
+    public string generateExerciseFeel() {
+        int value = 0, type = 0;
+        foreach (Subject s in result.increment)
+            value += s.getValue() / result.increment.Length;
+        if (value > 10) type = 1;
+        if (value > 20) type = 2;
+        if (value > 50) type = 3;
+        if (value > 100) type = 4;
+        if (value > 300) type = 5;
+        string[] texts = FeelingTexts[type];
+        int id = UnityEngine.Random.Range(0, texts.Length);
+        return texts[id];
+    }
 
-	public class ExerciseResult {
+
+    public class ExerciseResult {
 		public Subject[]	increment;	// 科目点数增量
 		public int 			score;		// 刷题总分
 		public int[][] 		selections;	// 各题选择记录
@@ -125,12 +170,23 @@ public class Exercise : QuestionSet {
 		DateTime now = DateTime.Now;
 		TimeSpan span = now - startTime;
 		result.totSpan = span;
+        filterQuestions();
 		dealIncrement();
 		base.terminate();
 	}
+    void filterQuestions() {
+        List<Question> qs = new List<Question>();
+        int cnt = questions.Length;
+        for (int i = 0; i < cnt; i++) {
+            Debug.Log("i = " + i);
+            if (result.selections[i] != null)
+                qs.Add(questions[i]);
+        }
+        questions = qs.ToArray();
+    }
 
-	protected override void initializeResult(){
-		this.result = new ExerciseResult();
+    protected override void initializeResult(){
+        this.result = new ExerciseResult();
 		result.score = 0;
 		result.increment = Subject.getStandardSubjects(
 			Subject.DefaultMultSubjectSet[subjectId]);
@@ -139,6 +195,7 @@ public class Exercise : QuestionSet {
 	}
 
 	public void answerQuestion(int qid, int[] selection, TimeSpan span){
+        if (result.selections[qid] != null) return;
 		//DateTime now = DateTime.Now;
 		//TimeSpan span = now - startTime;
 		result.spans[qid] = span;
@@ -148,7 +205,7 @@ public class Exercise : QuestionSet {
 	}
 
 	void dealEnergyCost(int qid){
-		player.changeEnergy(questions[qid].getEnergyCost());
+		player.changeEnergy(-questions[qid].getEnergyCost());
 	}	
 	void dealIncrement(){
 		resetIncrement(); calcIncrement();
@@ -167,14 +224,17 @@ public class Exercise : QuestionSet {
 		for(int i=0;i<questions.Length;i++){
 			Question q = questions[i];
 			int[] sel = result.selections[i];
-			Subject incre = calcQuestionIncre(value, q, sel);
+            TimeSpan span = result.spans[i];
+			Subject incre = calcQuestionIncre(span, value, q, sel);
 			for(int j=0;j<result.increment.Length;j++)
 				result.increment[j].addPoint(incre);
 		}
 	}
-	Subject calcQuestionIncre(int value, Question q, int[] sel){
-		Subject sbj = Subject.getStandardSubject(q.getSubjectId());		
-		int level = q.getLevel();
+	Subject calcQuestionIncre(TimeSpan span, int value, Question q, int[] sel){
+		Subject sbj = Subject.getStandardSubject(q.getSubjectId());
+        if (sel.Length == 0) return sbj;
+        int level = q.getLevel();
+        double min = span.TotalMinutes;
 		int count = q.getCount();
 		bool corr = q.isCorrect(sel);
 		double base_ = Question.IncreBase[level];
@@ -183,7 +243,8 @@ public class Exercise : QuestionSet {
 		base_ *= calcValueEffect(value,entry);
 		base_ *= calcCorrEffect(corr);
 		base_ *= calcDisperEffect();
-		sbj.addPoint(Mathf.RoundToInt((float)base_));
+        if (min <= Question.LevelMinMinute[level]) base_ *= ShortTimeRate;
+        sbj.addPoint(Mathf.RoundToInt((float)base_));
 		return sbj;
 	}
 	double sigmoid(double x){

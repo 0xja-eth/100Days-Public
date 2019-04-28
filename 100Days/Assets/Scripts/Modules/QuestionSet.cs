@@ -11,6 +11,7 @@ public class QuestionSetJsonData {
     public int subjectId;
     public int[] questions;
     public bool finished;
+    public int type;
     public QuestionSetJsonData(QuestionSetJsonData data=null) {
         if (data == null) return;
         date = data.date;
@@ -19,6 +20,7 @@ public class QuestionSetJsonData {
         subjectId = data.subjectId;
         questions = data.questions;
         finished = data.finished;
+        type = data.type;
     }
 }
 
@@ -40,7 +42,8 @@ public class QuestionSet : IComparable<QuestionSet> {
 
 	public DateTime getDate() {return date;}
 	public DateTime getStartTime() {return startTime;}
-	public int getCount() {return count; }
+    public DataSystem.QuestionDistribution.Type getType() { return type; }
+    public int getCount() {return count; }
     public int getSubjectId() { return subjectId; }
     public int getQuestionCount() {return questions.Length; }
     public Question getQuestion(int id) { return questions[id]; }
@@ -63,6 +66,7 @@ public class QuestionSet : IComparable<QuestionSet> {
         for (int i = 0; i < cnt; i++)
             data.questions[i] = questions[i].getId();
         data.finished = finished;
+        data.type = (int)type;
         return data;
     }
     virtual public bool fromJsonData(QuestionSetJsonData data) {
@@ -76,6 +80,7 @@ public class QuestionSet : IComparable<QuestionSet> {
             questions[i] = DataSystem.getQuestionById(
                 data.questions[i]);
         finished = data.finished;
+        type = (DataSystem.QuestionDistribution.Type) data.type;
         return true;
     }
 

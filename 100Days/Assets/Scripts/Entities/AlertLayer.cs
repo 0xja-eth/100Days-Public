@@ -7,8 +7,9 @@ using UnityEngine.Events;
 
 public class AlertLayer : AnimatableLayer {
 
-    const int alertTextPaddingButtom = 24;
-    const int okButtonPaddingButtom = 24;
+    const int AlertTextPaddingTop = 36;
+    const int TextButtonSpacing = 18;
+    const int OkButtonPaddingButtom = 36;
 
 	public RectTransform alertText, buttons;
 	public RectTransform alertWindow;
@@ -33,9 +34,9 @@ public class AlertLayer : AnimatableLayer {
 	}
 
 	void updateWindowSize(){
-		float height = -alertText.rect.y+alertText.rect.height+
-			alertTextPaddingButtom+buttons.rect.height+
-			okButtonPaddingButtom;
+        float height = AlertTextPaddingTop + alertText.rect.height +
+            TextButtonSpacing + buttons.rect.height +
+            OkButtonPaddingButtom;
 
         GameUtils.setRectHeight(alertWindow, height);
 		//alertWindow.SetSizeWithCurrentAnchors(

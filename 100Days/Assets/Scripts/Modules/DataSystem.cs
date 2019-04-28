@@ -13,6 +13,7 @@ public static class DataSystem {
 
     public static readonly string QuestionPath = "Questions/";
 
+    static bool initialized = false;
     // 题目分发帮助信息
     public static class QuestionDistribution {
 		public enum Type {
@@ -23,6 +24,10 @@ public static class DataSystem {
 			MiddleFirst,	// 中等题优先
 			DifficultFirst	// 难题优先
 		}
+        public static readonly string[] TypeText = {
+            "普通模式", "已做优先", "未做优先", "错题优先", "对题优先",
+            "简单题优先", "中档题优先", "难题优先"
+        };
 
 		public const int DifficulterRate = 10; // 抽到更难题目几率
 		public const int OFFactor = 75; // OccurFirst 因数
@@ -52,8 +57,11 @@ public static class DataSystem {
 
 
 	public static void initialize(){
+        if (initialized) return;
 		addQuestions();
-	}
+        initialized = true;
+
+    }
 
 	// 整理数据库中题目
 	static void arrangeQuestions(){
@@ -103,6 +111,9 @@ public static class DataSystem {
         for(int s = 0; s < SMAX; s++) for(int l=0; l < LMAX; l++) {
             int cnt = 1; while (loadQuestion(s, l, cnt++)) ;
         }
+    }
+    public static void loadQuestionDatabase() {
+        WWW w = new WWW("localhost");
     }
     static bool loadQuestion(int s, int l, int cnt) {
         string sbj = Subject.SubjectName[s], lvl = (l + 1).ToString();

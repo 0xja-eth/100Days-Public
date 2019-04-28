@@ -11,7 +11,7 @@ public class AnimatableLayer : MonoBehaviour {
     protected const float resizeSpeed = 0.2f;
     protected const float colorSpeed = 0.075f;
 
-    protected const float stopMoveDist = 1f;
+    protected const float stopMoveDist = 0.1f;
     protected const float stopRotaDist = 1f;
     protected const float stopScaleDist = 0.05f;
     protected const float stopResizeDist = 0.02f;
@@ -25,6 +25,7 @@ public class AnimatableLayer : MonoBehaviour {
     public Image image;
 
     UnityAction action;
+    protected UIBaseLayer uiBaseLayer;
     protected RectTransform rectTransform;
 
     public bool posDisable, rotDisable, sclDisable, resDisable, colDisable;
@@ -35,6 +36,7 @@ public class AnimatableLayer : MonoBehaviour {
 
     // Use this for initialization
     protected void Awake() {
+        uiBaseLayer = GameUtils.getUIBaseLayer();
         rectTransform = (RectTransform)transform;
         initGeneralAnimationParams();
     }
@@ -43,9 +45,17 @@ public class AnimatableLayer : MonoBehaviour {
 	
 	// Update is called once per frame
 	protected virtual void Update () {
+        updateBackground();
         updateGeneralAnimation();
         updateSpecificAnimation();
+    }
 
+    void OnDisable() {
+        if (background) background.SetActive(false);
+    }
+
+    void updateBackground() {
+        if (background) background.SetActive(gameObject.activeSelf);
     }
 
     void initGeneralAnimationParams() {
@@ -69,8 +79,10 @@ public class AnimatableLayer : MonoBehaviour {
             stopGeneralAnimation();
     }
     void updatePositionAnimation() {
-        if (gameObject.name == TestObjectName)
-            Debug.Log("Position: " + targetPosition + " ← " + transform.position);
+        if (gameObject.name == TestObjectName) 
+            Debug.Log("Position: " + targetPosition + " ← " + transform.position + 
+                " Distance = " + Vector3.Distance(transform.position, targetPosition) + 
+                " StopMove = " + stopMoveDist);
         transform.position += (targetPosition - transform.position) * moveSpeed;
     }
     void updateRotationAnimation() {
@@ -100,11 +112,11 @@ public class AnimatableLayer : MonoBehaviour {
 
     bool isGeneralAniPlaying() {
         Vector2 size = rectToSize();
-        return (posAniEnable() && transform.position != targetPosition)
+        return !isGeneralAniStopping();/* (posAniEnable() && transform.position != targetPosition)
             || (rotAniEnable() && transform.eulerAngles != targetRotation)
             || (sclAniEnable() && transform.localScale != targetScale)
             || (resAniEnable() && size != targetSize)
-            || (colAniEnable() && (Vector4)image.color != targetColor);
+            || (colAniEnable() && (Vector4)image.color != targetColor);*/
     }
     bool isGeneralAniStopping() {
         Vector2 size = rectToSize();
@@ -122,7 +134,7 @@ public class AnimatableLayer : MonoBehaviour {
     protected bool colAniEnable() { return !colDisable && image; }
 
     public void stopGeneralAnimation(bool force = false) {
-        if (gameObject.name == "NightMask")
+        if (gameObject.name == TestObjectName)
             Debug.Log("stopGeneralAnimation");
         resetGeneralAnimation();
         stopAnimation(force);
@@ -172,6 +184,8 @@ public class AnimatableLayer : MonoBehaviour {
 
     // Animation Operation
     void stopAnimation(bool force = false) {
+        if (gameObject.name == TestObjectName)
+            Debug.Log("Action: " + action);
         UnityAction lastAct = action;
         clearAnimation(); clearAction();
         if (lastAct != null && !force) lastAct.Invoke();
@@ -247,12 +261,11 @@ public class AnimatableLayer : MonoBehaviour {
     // Default Animation
     void onWindowHidden() {
         gameObject.SetActive(false);
-        Debug.Log("onWindowHidden: "+background);
-        if (background) background.SetActive(false);
+        //if (background) background.SetActive(false);
     }
     public void showWindow(Vector3? scale) {
         scale = scale ?? new Vector3(1, 1, 1);
-        if (background) background.SetActive(true);
+        //if (background) background.SetActive(true);
         gameObject.SetActive(true);
         scaleTo((Vector3)scale, "show");
     }

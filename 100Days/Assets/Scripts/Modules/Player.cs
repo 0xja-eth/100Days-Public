@@ -4,7 +4,8 @@ using UnityEngine;
 
 [System.Serializable]
 public class PlayerJsonData {
-    public string name;            
+    public string name;          
+    public string school;  
     public int maxEnergy, energy;  
     public int[] subjectParams;
     public int subjectSel;         
@@ -13,6 +14,7 @@ public class PlayerJsonData {
 
 public class Player {
 	string 		name;				// 玩家名字
+    string      school;             // 玩家学校
 	int 		maxEnergy, energy;	// 最大精力，当前精力
 	Subject[] 	subjectParams;		// 选择的科目点数属性
 	int 		subjectSel;			// 分科选择记录
@@ -21,7 +23,8 @@ public class Player {
 	const int DefaultMaxEnergy = 100;
 	const double DefaultReduceRate = 0.02;
 	
-	public string getName() {return name;}
+    public string getName() {return name;}
+    public string getSchool() {return school;}
 	public int getEnergy() {return energy;}
 	public int getMaxEnergy() {return maxEnergy;}
 
@@ -32,6 +35,7 @@ public class Player {
         PlayerJsonData data = new PlayerJsonData();
         int cnt = subjectParams.Length;
         data.name = name;
+        data.school = school;
         data.maxEnergy = maxEnergy;
         data.energy = energy;
         data.subjectSel = subjectSel;
@@ -43,6 +47,7 @@ public class Player {
     }
     public bool fromJsonData(PlayerJsonData data) {
         name = data.name;
+        school = data.school;
         maxEnergy = data.maxEnergy;
         energy = data.energy;
         selectSubject(data.subjectSel);
@@ -52,10 +57,11 @@ public class Player {
         return true;
     }
 
-    public Player(string name, int subjectsType) {
+    public Player(string name, string school, int subjectsType) {
         energy = maxEnergy = DefaultMaxEnergy;
         reduceRate = DefaultReduceRate;
         selectSubject(subjectsType);
+        this.school = school;
         this.name = name;
     }
     public Player(PlayerJsonData data) {

@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class QuestionDisplayer : MonoBehaviour {
-    static readonly Vector3 targetPosition = new Vector3(0, 14.2f, 8.1f);
-    static readonly Vector3 targetRotation = new Vector3(80, 0, 0);
+public class QuestionDisplayer : AnimatableLayer {
+    static readonly Vector3 cameraPosition = new Vector3(0, 15.2f, 12.5f);
+    static readonly Vector3 cameraRotation = new Vector3(80, 0, 0);
+
+    public Vector3 initPosition = new Vector3(0, 6.8f, 14.4f);
 
     public GameObject buttons;
 
@@ -14,6 +16,15 @@ public class QuestionDisplayer : MonoBehaviour {
         spaceIdentifier + "width=1" + spaceIdentifier + "/>";
     const string spaceEncode = "\u00A0";
     const string lineSpliter = "_______________________________\n\n";
+
+    protected Player player;
+
+    void Awake() {
+        base.Awake();
+        player = GameSystem.getPlayer();
+        //GameSystem.createPlayer();
+    }
+
     protected string getLevelText(int level) {
         string text = "";
         for (int i = 0; i <= level; i++)
@@ -91,10 +102,33 @@ public class QuestionDisplayer : MonoBehaviour {
     public void activateButtonsLayer() {
         buttons.SetActive(true);
     }
+    public void deactivateButtonsLayer() {
+        buttons.SetActive(false);
+    }
 
     protected void playStartAni() {
         CameraControl ctr = GameUtils.getCameraControl();
-        ctr.moveTo(targetPosition, targetRotation);
-        ctr.setCallback(() => { activateButtonsLayer(); });
+        ctr.moveTo(cameraPosition, cameraRotation);
+        ctr.setCallback(activateButtonsLayer);// () => { activateButtonsLayer(); });
+    }
+
+    public virtual void paperPositionReset() {
+        Debug.Log("paperPositionReset: " + gameObject.name + " → " + initPosition);
+        deactivateButtonsLayer();
+        moveTo(initPosition, "enter");
+        hideWindow(new Vector3(1, 1, 1));
+        stopGeneralAnimation();
+    }
+    public virtual void paperEnter() {
+        showWindow();
+        deactivateButtonsLayer();
+        Debug.Log("paperEnter: "+gameObject.name);
+        moveTo(new Vector3(0, 6.8f, 14.4f), "enter", activateButtonsLayer);
+    }
+    public virtual void paperOut() {
+        deactivateButtonsLayer();
+        Debug.Log("paperOut: " + gameObject.name);
+        hideWindow(new Vector3(1, 1, 1));
+        moveTo(new Vector3(0, 6.8f, 0), "out", paperPositionReset);
     }
 }

@@ -6,7 +6,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class AnswerLayer : QuestionDisplayer {
-	public Transform nextBtn, prevBtn;
+
+    public Transform nextBtn, prevBtn;
     
     public Text title, info, timer, score;
 	public RectTransform question;
@@ -24,10 +25,12 @@ public class AnswerLayer : QuestionDisplayer {
 
     // Use this for initialization
     void Start () {
+        base.Start();
     }
 	
 	// Update is called once per frame
 	void Update () {
+        base.Update();
         updateContentHeight();
     }
 
@@ -56,9 +59,11 @@ public class AnswerLayer : QuestionDisplayer {
         setPointer(quesPointer - 1);
     }
     public void backSccene() {
-
+        uiBaseLayer.backToUILayer();
+        paperPositionReset();
     }
     public Question curQuestion() {
+        Debug.Log(quesPointer);
         return questions[quesPointer];
     }
     public void setPointer(int index){
@@ -71,6 +76,7 @@ public class AnswerLayer : QuestionDisplayer {
     public void setExercise(Exercise e) {
         mode = "Exercise";
         exercise = e;
+        paperEnter();
         gameObject.SetActive(true);
         loadQuestions();
         showBaseInfo();
@@ -79,6 +85,7 @@ public class AnswerLayer : QuestionDisplayer {
     public void setExamSet(ExamSet e) {
         mode = "ExamSet";
         examSet = e;
+        paperEnter();
         gameObject.SetActive(true);
         loadQuestions();
         showBaseInfo();

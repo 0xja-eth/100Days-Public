@@ -23,8 +23,6 @@ public class ExamLayer : QuestionDisplayer {
     int quesPointer, examPointer;
     int quesCount, examCount;
 
-    Player player;
-
     DateTime quesTime;
     TimeSpan[] timeSpans;
     int[][] selections;
@@ -36,10 +34,12 @@ public class ExamLayer : QuestionDisplayer {
 
     // Use this for initialization
     void Awake() {
+        base.Awake();
         //GameSystem.createPlayer();
     }
 
     void Start() {
+        base.Start();
         /*
         player = GameSystem.getPlayer();
         player.showSubjectParams();
@@ -50,6 +50,7 @@ public class ExamLayer : QuestionDisplayer {
 
     // Update is called once per frame
     void Update() {
+        base.Update();
         if (doing && exam!=null) {
             updateTimer();
             updateChoicesPosition();
@@ -137,7 +138,7 @@ public class ExamLayer : QuestionDisplayer {
             //gameObject.SetActive(false);
             //disablePushButton();
             examResultLayer.setExamSet(examSet);
-            player.showSubjectParams();
+            //player.showSubjectParams();
 
             StorageSystem.saveGame();
         } else setExamPointer(examPointer + 1);
@@ -156,6 +157,7 @@ public class ExamLayer : QuestionDisplayer {
     }
 
     public void setExamSet(ExamSet e) {
+        player = GameSystem.getPlayer();
         gameObject.SetActive(true);
         examSet = e;
         examCount = e.getExamCount();

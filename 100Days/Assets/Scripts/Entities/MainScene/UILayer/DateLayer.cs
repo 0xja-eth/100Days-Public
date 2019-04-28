@@ -14,6 +14,7 @@ public class DateLayer : AnimatableLayer {
         bar.stopGeneralAnimation(true);
     }
     void Start () {
+        base.Start();
     }
 
     // Update is called once per frame
@@ -22,14 +23,11 @@ public class DateLayer : AnimatableLayer {
     }
 
     public void refresh() {
-        Debug.Log("refresh");
-        Debug.Log(GameSystem.getCurDate());
         player = GameSystem.getPlayer();
         refreshDate();
         refreshEnergy();
     }
     void refreshDate() {
-        Debug.Log(GameSystem.getCurDate());
         date.text = GameSystem.getCurDate().ToString("yyyy 年 MM 月 dd 日");
         day.text = GameSystem.getDays() + " 天";
     }

@@ -28,12 +28,13 @@ public static class StorageSystem {
         if (NeedEncode) json = base64Encode(json);
         saveIntoFile(json, GameSystem.getSaveIndex());
     }
-    public static void loadGame(int index) {
-        if (!hasSaveFile(index)) return;
+    public static bool loadGame(int index) {
+        if (!hasSaveFile(index)) return false;
         string json = loadFromFile(index);
         if (NeedEncode) json = base64Decode(json);
         Debug.Log(json);
         GameSystem.fromJsonData(loadSaveInfo(json));
+        return true;
     }
 
     public static void saveIntoFile(string data, int index) {
@@ -69,16 +70,26 @@ public static class StorageSystem {
         float pos = UnityEngine.Random.Range(0.1f, 0.9f);
         Debug.Log("base64Encode:");
         Debug.Log(code);
-        code.Insert((int)(code.Length * pos), salt);
+        code = code.Insert((int)(code.Length * pos), salt);
+        code = randString(DefaultSalt.Length) + code;
         Debug.Log(code);
         return code;
     }
     public static string base64Decode(string code, string salt = DefaultSalt) {
         Debug.Log("base64Decode:");
         Debug.Log(code);
+        code = code.Substring(salt.Length);
         code = code.Replace(salt, "");
         Debug.Log(code);
         byte[] bytes = Convert.FromBase64String(code);
         return Encoding.UTF8.GetString(bytes);
+    }
+    static string randString(int len) {
+        string s = "";
+        for (int i = 0; i < len; i++) {
+            char c = (char)UnityEngine.Random.Range('A', 'Z');
+            s += (UnityEngine.Random.Range(0, 2) > 1) ? Char.ToLower(c) : c;
+        }
+        return s;
     }
 }

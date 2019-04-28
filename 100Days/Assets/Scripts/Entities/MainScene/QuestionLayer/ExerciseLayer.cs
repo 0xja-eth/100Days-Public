@@ -3,10 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class ExerciseLayer : QuestionDisplayer {
     int quesPaddingButtom = 24;
     int choicesSpacing = 8;
+
+    public ExerciseResultLayer exerciseResultLayer;
 
     public Transform nextBtn, quitBtn;
 
@@ -20,8 +23,7 @@ public class ExerciseLayer : QuestionDisplayer {
 
 	int quesPointer;
 	int quesCount;
-
-    Player player = GameSystem.getPlayer();
+    
     DateTime quesTime;
 
     Exercise exercise;
@@ -30,10 +32,12 @@ public class ExerciseLayer : QuestionDisplayer {
 
     // Use this for initialization
     void Awake () {
-		//GameSystem.createPlayer();
-	}
+        base.Awake();
+        //GameSystem.createPlayer();
+    }
 
-	void Start() {
+    void Start() {
+        base.Start();
         /*
 		DataSystem.QuestionDistribution.Type type = 
 			(DataSystem.QuestionDistribution.Type) 
@@ -43,10 +47,11 @@ public class ExerciseLayer : QuestionDisplayer {
 		setExercise(new Exercise(2, sbjId,
 			DataSystem.QuestionDistribution.Type.Normal));*/
 
-	}
-	
-	// Update is called once per frame
-	void Update () {
+    }
+
+    // Update is called once per frame
+    void Update () {
+        base.Update();
         if (doing) {
             updateTimer();
             updateChoicesPosition();
@@ -84,36 +89,38 @@ public class ExerciseLayer : QuestionDisplayer {
 	}
 
 	public void nextPage(){
-		if(pushSelection()) {
-			if(quesPointer>=quesCount-1){
-                // 刷题完成
-                exercise.terminate();
-                RecordSystem.recordExercise(exercise);
-                answerLayer.setExercise(exercise);
-                gameObject.SetActive(false);
-                disableNextPageButton();
-                GameSystem.getPlayer().showSubjectParams();
-
-                StorageSystem.saveGame();
-            }
-            setPointer(quesPointer+1);
-			if(quesPointer>=quesCount-1)
-				changeNextPageButton();
-		}
+        if (!pushSelection()) return;
+        if (quesPointer >= quesCount - 1) finishExercise();
+        else {
+            Question nq = exercise.getQuestion(quesPointer + 1);
+            if (checkExerciseEnable(nq)) setPointer(quesPointer + 1);
+        }
 	}
 
 	public void setPointer(int index){
 		quesPointer = Mathf.Clamp(index,0,quesCount-1);
 		setQuestion(quesPointer, exercise.getQuestion(quesPointer));
-	}
+        if (quesPointer >= quesCount - 1) changeNextPageButton();
+    }
 
-	public void setExercise(Exercise e){
+	public void setExercise(Exercise e) {
+        player = GameSystem.getPlayer();
+        //paperPositionReset()
         gameObject.SetActive(true);
 		exercise = e;
 		quesCount = e.getQuestionCount();
 		playStartAni();
 		setPointer(0);
         e.start();
+    }
+    bool exerciseEnable(Question q) {
+        int val = q.getEnergyCost();
+        return player.getEnergy() >= val;
+    }
+    bool checkExerciseEnable(Question q) {
+        bool res = exerciseEnable(q);
+        if (!res) onExerciseExhausted();
+        return res;
     }
     public void setQuestion(int index, Question q) {
         quesTime = DateTime.Now;
@@ -157,16 +164,48 @@ public class ExerciseLayer : QuestionDisplayer {
         return selection.ToArray();
     }
 
+    bool pushSelection() {
+        int[] selection = getSelection();
+        if (selection.Length <= 0) {
+            GameUtils.alert("未选择选项！"); return false;
+        } else {
+            TimeSpan span = DateTime.Now - quesTime;
+            exercise.answerQuestion(quesPointer, selection, span);
+            return true;
+        }
+    }
+    void forcePushSelection() {
+        int[] selection = getSelection();
+        TimeSpan span = DateTime.Now - quesTime;
+        exercise.answerQuestion(quesPointer, selection, span);
+    }
 
-	bool pushSelection(){
-		int[] selection = getSelection();
-		if(selection.Length<=0){
-			GameUtils.alert("未选择选项！"); return false;
-		} else {
-			TimeSpan span = DateTime.Now - quesTime;
-			exercise.answerQuestion(quesPointer, selection, span);
-			return true;
-		}
-	}
+    public void onExerciseExhausted() {
+        GameUtils.alert("当前精力值过低 ( "+player.getEnergy()+" )，不足以继续刷题。\n点击确认结束刷题并进入结果界面。",
+            new string[] { null, "确认" }, new UnityAction[] { null, onExerciseQuit });
+    }
+    public void exerciseQuit() {
+        GameUtils.alert("刷题尚未完成，确定要退出吗？",
+            new string[] { null, "是", "否" },
+            new UnityAction[] { null, onExerciseQuit, null });
+    }
 
+    void finishExercise() {
+        exercise.terminate();
+        GameSystem.addDailyExeCnt();
+        RecordSystem.recordExercise(exercise);
+
+        exerciseResultLayer.setExercise(exercise);
+        StorageSystem.saveGame();
+    }
+
+    void onExerciseQuit() {
+        forcePushSelection();
+        finishExercise();
+        //backSccene();
+    }
+    public void backSccene() {
+        uiBaseLayer.backToUILayer();
+        paperPositionReset();
+    }
 }

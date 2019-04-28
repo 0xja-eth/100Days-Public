@@ -8,25 +8,33 @@ using UnityEngine.Events;
 
 public static class GameUtils {
 	static Transform objectFinder;
-	static Transform camera;
-	static Transform alertWindow;
+    static Transform camera;
+    static Transform uiLayer;
+    static Transform alertWindow;
 
 	static CameraControl cameraControl;
-	static AlertLayer alertLayer;
+    static UIBaseLayer uiBaseLayer;
+    static AlertLayer alertLayer;
 
-	public static void initialize(){
+    public static void initialize(string uiLayerPath = null, string alertWindowPath = null) {
 		objectFinder = GameObject.Find("ObjectFinder").transform;
-		camera = find<Transform>("MainCamera");
-		alertWindow = find<Transform>("Canvas2D/PromptLayer/AlertWindow");
-		cameraControl = get<CameraControl>(camera);
-		alertLayer = get<AlertLayer>(alertWindow);
-	}
+        if (objectFinder) camera = find<Transform>("MainCamera");
+        if (uiLayerPath != null && objectFinder)
+            uiLayer = find<Transform>(uiLayerPath);
+        if (alertWindowPath != null && objectFinder)
+            alertWindow = find<Transform>(alertWindowPath);
+        if (camera) cameraControl = get<CameraControl>(camera);
+        if (uiLayer) uiBaseLayer = get<UIBaseLayer>(uiLayer);
+        if (alertWindow) alertLayer = get<AlertLayer>(alertWindow);
+    }
 
-	public static Transform getCamera(){return camera;}
-	public static Transform getAlertWindow(){return alertWindow;}
+    public static Transform getCamera() { return camera; }
+    public static Transform getUILayer() { return uiLayer; }
+    public static Transform getAlertWindow(){ return alertWindow; }
 
-	public static CameraControl getCameraControl(){return cameraControl;}
-	public static AlertLayer getAlertLayer(){return alertLayer;}
+	public static CameraControl getCameraControl(){ return cameraControl; }
+    public static UIBaseLayer getUIBaseLayer() { return uiBaseLayer; }
+    public static AlertLayer getAlertLayer() { return alertLayer; }
 
     public static void alert(string msg, string[] btns = null, UnityAction[] actions = null) {
         alertLayer.setup(msg, btns, actions);

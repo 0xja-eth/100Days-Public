@@ -63,6 +63,8 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Entities\AlertLayer.cs" />
     <Compile Include="Assets\Scripts\Entities\AnimatableLayer.cs" />
+    <Compile Include="Assets\Scripts\Entities\AnimationScene\StartAnimationControl.cs" />
+    <Compile Include="Assets\Scripts\Entities\GameTitle\GameTitleControl.cs" />
     <Compile Include="Assets\Scripts\Entities\GameUtils.cs" />
     <Compile Include="Assets\Scripts\Entities\LinkImageText.cs" />
     <Compile Include="Assets\Scripts\Entities\MainScene\QuestionLayer\AnswerLayer.cs" />
@@ -70,6 +72,7 @@
     <Compile Include="Assets\Scripts\Entities\MainScene\QuestionLayer\ExamLayer.cs" />
     <Compile Include="Assets\Scripts\Entities\MainScene\QuestionLayer\ExamResultLayer.cs" />
     <Compile Include="Assets\Scripts\Entities\MainScene\QuestionLayer\ExerciseLayer.cs" />
+    <Compile Include="Assets\Scripts\Entities\MainScene\QuestionLayer\ExerciseResultLayer.cs" />
     <Compile Include="Assets\Scripts\Entities\MainScene\QuestionLayer\QuestionDisplayer.cs" />
     <Compile Include="Assets\Scripts\Entities\MainScene\UILayer\DateLayer.cs" />
     <Compile Include="Assets\Scripts\Entities\MainScene\UILayer\ExerciseConfigLayer.cs" />

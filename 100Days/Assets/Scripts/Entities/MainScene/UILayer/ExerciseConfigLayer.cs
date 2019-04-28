@@ -7,9 +7,7 @@ public class ExerciseConfigLayer : AnimatableLayer {
     const int MinCount = 1;
     const int MaxCount = 10;
 
-    public ExerciseLayer exerciseLayer;
-
-    public UIBaseLayer uiBaseLayer;
+    //public ExerciseLayer exerciseLayer;
 
     public Text time, count, cost;
     public Scrollbar countBar;
@@ -20,7 +18,7 @@ public class ExerciseConfigLayer : AnimatableLayer {
     void Awake() {
         base.Awake();
         player = GameSystem.getPlayer();
-        initializeSubjects();
+        refresh();
     }
     void Start () {
         base.Start();
@@ -39,13 +37,28 @@ public class ExerciseConfigLayer : AnimatableLayer {
         return getCount(countBar.value);
     }
 
+    void refresh() {
+        initializeSubjects();
+        initializeModes();
+    }
+
+    public void show() {
+        showWindow();
+        refreshEvaluate();
+    }
     void initializeSubjects() {
         subject.options.Clear();
         subject.options.Add(new Dropdown.OptionData("随机"));
-        for (int i = 0; i < player.getSubjectCount(); i++) 
+        for (int i = 0; i < player.getSubjectCount(); i++)
             subject.options.Add(new Dropdown.OptionData(
                 player.getSubjectParam(i).getName()));
         subject.value = 0;
+    }
+    void initializeModes() {
+        mode.options.Clear();
+        foreach(string txt in DataSystem.QuestionDistribution.TypeText)
+            mode.options.Add(new Dropdown.OptionData(txt));
+        mode.value = 0;
     }
     public void refreshEvaluate() {
         int sid = subject.value;
@@ -66,8 +79,7 @@ public class ExerciseConfigLayer : AnimatableLayer {
         time.text = min + " min";
     }
     public void startExercise() {
-        exerciseLayer.setExercise(produceExercise());
-        uiBaseLayer.hideUILayer();
+        uiBaseLayer.startExercise(produceExercise());
         hideWindow(new Vector3(1, 0, 0));
     }
     public void closeWindow() {

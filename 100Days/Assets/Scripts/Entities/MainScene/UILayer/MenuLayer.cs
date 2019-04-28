@@ -5,8 +5,8 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 public class MenuLayer : AnimatableLayer { 
-    const int initialHeight = 64;
-    const int extendHeight = 220;
+    const int initialHeight = 88;
+    const int extendHeight = 270;
     
     new const float resizeSpeed = 0.18f;
     new const float stopResizeDist = 1f;
@@ -18,6 +18,7 @@ public class MenuLayer : AnimatableLayer {
     bool extended = false;
 
 	void Start () {
+        base.Start();
     }
 	
 	// Update is called once per frame

@@ -7,7 +7,7 @@ public class ExamResultLayer : AnimatableLayer {
 
     public Text title, name_, detail;
 
-    public GameObject examLayerObject;
+    public ExamLayer examLayer;
     public AnswerLayer answerLayer;
 
     Player player;
@@ -28,7 +28,7 @@ public class ExamResultLayer : AnimatableLayer {
         examSet = es;
         player = GameSystem.getPlayer();
         title.text = es.getName()+" 成绩单";
-        name_.text = "姓名：<size=18>" + 
+        name_.text = "姓名：<size=30>" + 
             player.getName() + "</size>";
         detail.text = "";
         int cnt = es.getExamCount();
@@ -43,12 +43,18 @@ public class ExamResultLayer : AnimatableLayer {
         detail.text += sbj + ": " + score + "/" + maxScore + "\n";
     }
     public void backScene() {
-        hideWindow(new Vector3(1,0,0));
+        hideWindow(new Vector3(1, 0, 0));
+        uiBaseLayer.backToUILayer();
+        examLayer.paperPositionReset();
     }
     public void showDescription() {
+        hideWindow(new Vector3(1, 0, 0));
+        examLayer.paperOut();
+        answerLayer.setExamSet(examSet);
+        /*
         hideWindow();
         examLayerObject.SetActive(false);
         answerLayer.setExamSet(examSet);
-
+        */
     }
 }

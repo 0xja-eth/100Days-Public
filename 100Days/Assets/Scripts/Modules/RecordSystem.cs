@@ -47,14 +47,7 @@ public static class RecordSystem {
         return data;
     }
     public static bool fromJsonData(RecordJsonData data) {
-        if (!initialized) initialize();
-        else {
-            questionRec.Clear();
-            exerciseRec.Clear();
-            examSetRec.Clear();
-            questionCollection.Clear();
-            questionWrong.Clear();
-        }
+        clear();
         int cnt = data.questionRec.Length;
         for (int i = 0; i < cnt; i++) {
             QuestionStatJsonData d = data.questionRec[i];
@@ -80,12 +73,22 @@ public static class RecordSystem {
     }
 
     static public void initialize(){
-        questionRec = new List<Question>();
-        exerciseRec = new List<Exercise>();
-		examSetRec = new List<ExamSet>();
-		questionWrong = new List<Question>();
-		questionCollection = new List<Question>();
-        initialized = true;
+        if (!initialized) {
+            questionRec = new List<Question>();
+            exerciseRec = new List<Exercise>();
+            examSetRec = new List<ExamSet>();
+            questionWrong = new List<Question>();
+            questionCollection = new List<Question>();
+        } else clear();
+       initialized = true;
+    }
+    static public void clear() {
+        if (!initialized) initialize();
+        questionRec.Clear();
+        exerciseRec.Clear();
+        examSetRec.Clear();
+        questionCollection.Clear();
+        questionWrong.Clear();
     }
 
     static public void recordQuestion(Question q) {

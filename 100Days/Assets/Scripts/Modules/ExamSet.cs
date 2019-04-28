@@ -238,7 +238,7 @@ public class FirstExam : ExamSet {
 
     protected override string generateName(int sid = -1) {
         DateTime curDate = GameSystem.getCurDate();
-        return "XX中学" + curDate.Year.ToString() + "学年第一次摸底考";
+        return player.getSchool() + " " + curDate.Year.ToString() + "学年第一次摸底考";
     }
     // 考试结束后，生成科目点数
     protected override void afterTerminate() {
