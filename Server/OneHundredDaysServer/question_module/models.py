@@ -29,7 +29,7 @@ class Choice(models.Model):
 	text = models.TextField()
 
 	# 正误
-	answer = models.BooleanField()
+	answer = models.BooleanField(default=False)
 
 	# 所属问题ID
 	question = models.ForeignKey('Question', null=False, on_delete=models.CASCADE)
@@ -37,10 +37,16 @@ class Choice(models.Model):
 	def __str__(self):
 		return self.text
 
-	def question_id(self):
+	def questionId(self):
 		if self.question == None:
 			return ''
 		return self.question.id
+
+	def convertToDict(self):
+		return {
+			'text' : self.text,
+			'answer' : self.answer
+		}
 
 class QuestionPicture(models.Model):
 	"""
@@ -53,7 +59,7 @@ class QuestionPicture(models.Model):
 	def __str__(self):
 		return self.file
 
-	def question_id(self):
+	def questionId(self):
 		if self.question == None:
 			return ''
 		return self.question.id
@@ -67,7 +73,7 @@ class Question(models.Model):
 	title = models.TextField()
 
 	# 题解
-	description = models.TextField()
+	description = models.TextField(default="无")
 
 	# 星数
 	level = models.PositiveSmallIntegerField(default=1)
@@ -76,34 +82,44 @@ class Question(models.Model):
 	score = models.PositiveSmallIntegerField(default=6)
 
 	# 科目ID
-	subject = models.ForeignKey('Subject',
-		default=1, blank=False, on_delete=models.CASCADE)
+	subject = models.ForeignKey('Subject', default=1, on_delete=models.CASCADE)
 
 	# 类型ID
-	type = models.ForeignKey('QuestionType',
-		default=1, blank=False, on_delete=models.CASCADE)
+	type = models.ForeignKey('QuestionType', default=1, on_delete=models.CASCADE)
+
+	for_test = models.BooleanField(default=False)
 
 	def __str__(self):
+		
 		return self.title
 
-	def subject_name(self):
+	def subjectName(self):
+
 		if self.subject == None:
 			return ''
 		return self.subject.name
 
-	def type_text(self):
+	def typeText(self):
+
 		if self.type == None:
 			return ''
 		return self.type.text
 
-	def convert_to_dict(self):
+	def convertToDict(self):
+
+		choices = []
+		choice_set = self.choice_set.all()
+		for choice in choice_set:
+			choices.append(choice.convertToDict())
+
 		return {
             'id' : self.id,
             'title' : self.title,
             'description' : self.description,
             'level' : self.level,
             'score' : self.score, 
-            'subjectId' : self.subject,
-            'choices' : self.choice_set.all()
+            'subjectId' : self.subject.id-1,
+            'type' : self.type.id-1,
+            'choices' : choices
         }
 

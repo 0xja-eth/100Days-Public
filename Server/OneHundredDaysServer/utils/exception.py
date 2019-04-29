@@ -9,12 +9,13 @@ class ErrorType(Enum):
 	# Savefile
 	FileNotFound		= 10 # 文件未找到
 	PlayerDisMatch		= 11 # 玩家不匹配
-	SavefileError		= 12 # 玩家不匹配
+	SavefileError		= 12 # 存档错误
+	NoSavefileInfo		= 13 # 无存档信息
 
 	# Player
-	PlayerNotExist:		= 20 # 玩家不存在
-	PlayerExist:		= 21 # 玩家已存在
-	SchoolNotExist:		= 22 # 学校不存在
+	PlayerNotExist		= 20 # 玩家不存在
+	PlayerExist			= 21 # 玩家已存在
+	SchoolNotExist		= 22 # 学校不存在
 
 class ErrorException(Exception):
 
@@ -28,6 +29,7 @@ class ErrorException(Exception):
 		ErrorType.FileNotFound:		"未找到存档文件！",
 		ErrorType.PlayerDisMatch:	"玩家不匹配！",
 		ErrorType.SavefileError:	"存档错误！",
+		ErrorType.NoSavefileInfo:	"无存档信息！",
 
 		# Player
 		ErrorType.PlayerNotExist:	"玩家不存在！",

@@ -23,17 +23,17 @@ class SubjectAdmin(admin.ModelAdmin):
 
 class ChoiceAdmin(admin.ModelAdmin):
 
-    list_display = ['id','question_id','text']
+    list_display = ['id','questionId','text']
 
-class SubjectAdmin(admin.ModelAdmin):
+class QuestionPictureAdmin(admin.ModelAdmin):
 
-    list_display = ['id','question_id','file']
+    list_display = ['id','questionId','file']
 
 class QuestionAdmin(admin.ModelAdmin):
 
-    list_display = ['id','title','subject_name','level','type_text','score']
+    list_display = ['id','title','subjectName','level','typeText','score','for_test']
 
-    fields = ['title','subject','level','type','score','description']
+    fields = ['title','subject','level','type','score','description','for_test']
 
     inlines = [ ChoicesOfQuestion, PicturesOfQuestion ]
 
@@ -41,8 +41,8 @@ admin.site.register(QuestionType, QuestionTypeAdmin)
 
 admin.site.register(Subject, SubjectAdmin)
 
-admin.site.register(Choice)
+admin.site.register(Choice, ChoiceAdmin)
 
-admin.site.register(QuestionPicture)
+admin.site.register(QuestionPicture, QuestionPictureAdmin)
 
 admin.site.register(Question, QuestionAdmin)

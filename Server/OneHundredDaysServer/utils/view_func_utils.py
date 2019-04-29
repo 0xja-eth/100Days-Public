@@ -28,22 +28,30 @@ def processRequest(request, POST=[], GET=[], FILES=[]):
 		else:
 			raise ErrorException(ErrorType.ParameterError)
 
+	print (data)
+
 	return data
 
-def convertRequestDataType(data, key, type='str'):
-	try:
-		if   type == 'int':
-			data[key] = int(data[key])
-		
-		elif type == 'video':
-			pass # 判断是否为视频类型
-		# 其他类型判断
+def convertRequestDataType(data, keys, type='str'):
+	for key in keys:
+		try:
+			if   type == 'int':
+				data[key] = int(data[key])
+			
+			elif type == 'savefile':
+				pass # 判断是否为存档文件类型
+			# 其他类型判断
 
-	except ErrorException as exception:
-		raise ErrorException(ErrorType.ParameterError)
+		except ErrorException as exception:
+			raise ErrorException(ErrorType.ParameterError)
+
+def convertRequestDataTypeAll(data, type='str'):
+	convertRequestDataType(data, data, type)
 
 def getSuccessResponse(dict={}):
 	dict['status'] = ErrorType.Success.value
+
+	print (dict)
 
 	if settings.HTML_TEST:
 		# 测试代码

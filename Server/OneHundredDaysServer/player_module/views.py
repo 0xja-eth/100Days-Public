@@ -1,7 +1,6 @@
 from django.shortcuts import render
-from django.core.exceptions import DoesNotExist
 from django.conf import settings
-from utils.view_func_utils import processRequest, getErrorResponse, getSuccessResponse
+from utils.view_func_utils import processRequest, getErrorResponse, getSuccessResponse, convertRequestDataType
 from utils.exception import ErrorType, ErrorException
 from player_module.models import Player, School
 
@@ -26,6 +25,8 @@ def player_save(request):
 		# 获取数据
 		data = processRequest(request, POST=['name'], FILES=['save'])
 
+		convertRequestDataType(data, ['save'], 'save')
+
 		name = data['name']
 		save = data['save']
 
@@ -42,9 +43,7 @@ def school_get(request):
 		# 获取数据
 		data = processRequest(request)
 
-		result = getSchools()
-		for i in range(len(result)):
-			result[i] = result[i].name
+		result = getSchools('dict')
 
 	except ErrorException as exception:
 		return getErrorResponse(exception)
@@ -82,9 +81,9 @@ def createSchool(name):
 
 	:param name:  学校名字
 	"""
-	if not isSchoolExists(school):
+	if not isSchoolExists(name):
 		school_obj = School()
-		school_obj.name = school
+		school_obj.name = name
 		school_obj.save()
 
 		return school_obj
@@ -105,13 +104,21 @@ def pushSavefile(name, save):
 
 	player.refresh()
 
-def getSchools():
+def getSchools(return_type='QuerySet'):
 	"""
-	创建学校
+	获取全部学校
 
 	:return:  学校(QuerySet)
 	"""
-	return School.objects.all()
+	result = School.objects.all()
+
+	if return_type == 'dict':
+		temp = []
+		for r in result:
+			temp.append(r.name)
+		result = temp
+
+	return result 
 
 
 def isPlayerExists(name):
@@ -136,7 +143,7 @@ def ensurePlayerExists(name):
 	保证玩家存在，不存在时抛出异常
 	:param name:  玩家名字
 	"""
-	if not isExists(name):
+	if not isPlayerExists(name):
 		raise ErrorException(ErrorType.PlayerNotExist)
 
 def ensurePlayerNotExists(name):
@@ -144,7 +151,7 @@ def ensurePlayerNotExists(name):
 	保证玩家不存在，存在时抛出异常
 	:param name:  玩家名字
 	"""
-	if isExists(name):
+	if isPlayerExists(name):
 		raise ErrorException(ErrorType.PlayerExist)
 
 def ensureSchoolExists(name):
@@ -152,5 +159,5 @@ def ensureSchoolExists(name):
 	保证玩家存在，不存在时抛出异常
 	:param name:  学校名字
 	"""
-	if not isExists(name):
+	if not isSchoolExists(name):
 		raise ErrorException(ErrorType.SchoolNotExist)

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Test</title>
+	<style type="text/css">
+		body{
+			width: 100%;
+			height: 100%;
+		}
+		#form-block{
+			position: fixed;
+			right: 0;
+			top: 0;
+			height: 50%;
+			transform: translateY(50%);
+			width: 50%;
+			background: white;
+		}
+			#form-container{
+				position: absolute;
+				top: 24px;
+				left: 4px; right: 4px;
+				bottom: 4px;				
+			}
+			#form{
+				width: 100%;
+				height: 100%;
+				border: none;
+			}
+		.block{
+			border-style: solid;
+			border-color: black;
+			margin: 4px;
+			padding: 4px;
+		}
+	</style>
+</head>
+<body>
+	<div class="block">
+		Player Register Test<br>
+		<form id="player_create" enctype="multipart/form-data" target="form" action="http://localhost:8000/player/player/create" method="post">
+			name: <input type="text" name="name"><br>
+			school: <input type="text" name="school"><br>
+			<input type="submit" value="Submit">
+		</form>
+	</div>
+	<div class="block">
+		Player Save Test<br>
+		<form id="player_save" enctype="multipart/form-data" target="form" action="http://localhost:8000/player/player/save" method="post">
+			name: <input type="text" name="name"><br>
+			save: <input type="file" name="save"><br>
+			<input type="submit" value="Submit">
+		</form>
+	</div>
+	<div class="block">
+		School Get Test<br>
+		<form id="school_get" enctype="multipart/form-data" target="form" action="http://localhost:8000/player/school/get" method="post">
+		<input type="submit" value="Submit">
+	</form>
+	</div>
+	<div class="block">
+		Question Query ID Test<br>
+		<form id="query_id" enctype="multipart/form-data" target="form" action="http://localhost:8000/question/query/id" method="post">
+		id: <input type="text" name="id"><br>
+		<input type="submit" value="Submit">
+	</form>
+	</div>
+	<div class="block">
+		Question Query All Test<br>
+		<form id="query_all" enctype="multipart/form-data" target="form" action="http://localhost:8000/question/query/all" method="post">
+		<input type="submit" value="Submit">
+	</form>
+	</div>
+	<div class="block">
+		Question Query Filter Test<br>
+		<form id="query_filter" enctype="multipart/form-data" target="form" action="http://localhost:8000/question/query/filter" method="post">
+		type: <input type="text" name="type"><br>
+		param: <input type="text" name="param"><br>
+		<input type="submit" value="Submit">
+	</form>
+	<div class="block">
+		Question Generate All Test<br>
+		<form id="generate_all" enctype="multipart/form-data" target="form" action="http://localhost:8000/question/generate/all" method="post">
+		sid: <input type="text" name="sid"><br>
+		dtb_type: <input type="text" name="dtb_type"><br>
+		count: <input type="text" name="count"><br>
+		name: <input type="text" name="name"><br>
+		<input type="submit" value="Submit">
+	</form>
+	<div class="block">
+		Question Generate Type Test<br>
+		<form id="generate_type" enctype="multipart/form-data" target="form" action="http://localhost:8000/question/generate/type" method="post">
+		sid: <input type="text" name="sid"><br>
+		dtb_type: <input type="text" name="dtb_type"><br>
+		count: <input type="text" name="count"><br>
+		name: <input type="text" name="name"><br>
+		type: <input type="text" name="type"><br>
+		<input type="submit" value="Submit">
+	</form>
+	<div class="block">
+		Question Generate Level Test<br>
+		<form id="generate_level" enctype="multipart/form-data" target="form" action="http://localhost:8000/question/generate/level" method="post">
+		sid: <input type="text" name="sid"><br>
+		dtb_type: <input type="text" name="dtb_type"><br>
+		count: <input type="text" name="count"><br>
+		name: <input type="text" name="name"><br>
+		level: <input type="text" name="level"><br>
+		<input type="submit" value="Submit">
+	</form>
+	<div class="block">
+		Test Randomly Test<br>
+		<form id="test_randomly" enctype="multipart/form-data" target="form" action="http://localhost:8000/question/test/randomly" method="post">
+		count: <input type="text" name="count"><br>
+		<input type="submit" value="Submit">
+	</form>
+	<div class="block">
+		Test Delete Test<br>
+		<form id="test_delete" enctype="multipart/form-data" target="form" action="http://localhost:8000/question/test/delete" method="post">
+		<input type="submit" value="Submit">
+	</form>
+	</div>
+	<div id="form-block" class="block">
+		Respone:<br>
+		<div id="form-container">			
+		<iframe id="form" name="form"></iframe>
+		</div>
+	</div>
+	<script type="text/javascript">
+	</script>
+</body>
+</html>

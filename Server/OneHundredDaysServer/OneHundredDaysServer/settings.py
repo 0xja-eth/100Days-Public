@@ -25,8 +25,9 @@ SECRET_KEY = '2%pwilobn@!cdv=14jep5n-5+(@-j+zv!ad@m)!debjpdzb$r='
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost']
 
+HTML_TEST = True
 
 # Application definition
 
@@ -45,7 +46,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -83,8 +84,13 @@ DATABASES = {
         'PASSWORD': '', # 登录MySQL的密码
         'HOST': 'localhost', # MySQL数据库所在的主机的ip
         'PORT': 3306, # MySQL服务的端口号
+        'OPTIONS': {
+            "init_command": "SET default_storage_engine='INNODB'"
+        }
     }
 }
+DATABASES['default']['OPTIONS']['init_command'] = "SET sql_mode='STRICT_TRANS_TABLES'"#排除错误
+
 """
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -114,15 +120,17 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'zh-hans'    # 中文
+
+TIME_ZONE = 'Asia/Shanghai'  # 中国上海时区
 
 USE_I18N = True
 
 USE_L10N = True
 
 USE_TZ = True
+
 
 
 # Static files (CSS, JavaScript, Images)
@@ -134,6 +142,7 @@ SAVEFILE_SALT = 'R0cDovMzgwLTE2Lm1pZAl'
 
 GAME_SETTING = {
     'QUESTION' : {
-        'EntryValue' : [0,0,80,250,750,2000]
+        'EntryValue' : [0,0,80,250,750,2000],
+        'GenerateTimesLimit' : 1000
     }
 }

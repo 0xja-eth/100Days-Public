@@ -14,6 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.conf import settings
 from django.urls import path, include
 
 from question_module import views
@@ -26,6 +27,11 @@ urlpatterns = [
     path('generate/type', views.generate_type),
     path('generate/level', views.generate_level),
 ]
+if settings.HTML_TEST:
+    urlpatterns.extend([
+        path('test/randomly', views.test_randomly),
+        path('test/delete', views.test_delete)
+    ])
 """
     path('admin/push', views.admin_push),
     path('admin/update', views.admin_update),
