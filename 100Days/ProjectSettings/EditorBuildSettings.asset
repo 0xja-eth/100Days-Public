@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/StartAnimationScene.unity
     guid: bcc311b2427c72149b9ce7e2b90889eb
+  - enabled: 1
+    path: Assets/Scenes/StartAndSave.unity
+    guid: 925654b138d39c144928ce1e54bc91f6
   m_configObjects: {}

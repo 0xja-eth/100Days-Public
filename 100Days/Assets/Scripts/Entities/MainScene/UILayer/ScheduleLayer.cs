@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class ScheduleLayer : AnimatableLayer {
     const int MinExerciseEnergy = 10;
-    const int MaxNextDayEnergy = 15;
+    const int MaxNextDayEnergy = 100;
 
     public Button exercise, game, friend, end;
 
