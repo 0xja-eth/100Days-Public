@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,12 +7,12 @@ using UnityEngine.UI;
 public class DateLayer : AnimatableLayer {
     Player player;
 
-    public Text date, day;
-    public AnimatableLayer bar;
+    public ExamSetDispalyLayer examDisplay;
+
+    public Text date, day, next;
     // Use this for initialization
     void Awake() {
         base.Awake();
-        bar.stopGeneralAnimation(true);
     }
     void Start () {
         base.Start();
@@ -21,22 +22,27 @@ public class DateLayer : AnimatableLayer {
     void Update() {
         base.Update();
     }
+    
+    public void showNextExam() {
+        ExamSet es = GameSystem.getNextExam();
+        examDisplay.setExamSet(es);
+    }
 
     public void refresh() {
         player = GameSystem.getPlayer();
         refreshDate();
-        refreshEnergy();
+        refreshNextExam();
     }
     void refreshDate() {
         date.text = GameSystem.getCurDate().ToString("yyyy 年 MM 月 dd 日");
         day.text = GameSystem.getDays() + " 天";
     }
-    void refreshEnergy() {
-        int max = player.getMaxEnergy();
-        int cur = player.getEnergy();
-        float rate = cur*1.0f / max;
-        Debug.Log(rate);
-        bar.scaleTo(new Vector3(rate, 1, 1));
+    void refreshNextExam() {
+        next.text = "";
+        ExamSet es = GameSystem.getNextExam();
+        if (es == null) return;
+        TimeSpan ts = es.getDate() - GameSystem.getCurDate();
+        next.text = "下一次考试在 "+Mathf.FloorToInt((float)ts.TotalDays)+" 天后 >>";
     }
 
     public void layerEnter() {

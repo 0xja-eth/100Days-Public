@@ -31,7 +31,8 @@ class QuestionPictureAdmin(admin.ModelAdmin):
 
 class QuestionAdmin(admin.ModelAdmin):
 
-    list_display = ['id','title','subjectName','level','typeText','score','for_test']
+    list_display = ['id','title','subjectName','level',
+        'typeText','score','for_test','create_time', 'is_deleted']
 
     fields = ['title','subject','level','type','score','description','for_test']
 

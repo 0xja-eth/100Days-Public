@@ -5,20 +5,43 @@ using UnityEngine;
 
 [System.Serializable]
 public class ExerciseJsonData : QuestionSetJsonData {
-    public ExerciseResultJsonData result;
+    public bool deleted;
+    //public ExerciseResultJsonData result;
+    public SubjectJsonDataArray increment;
+    public int score;
+    public IntArray2D selections;
+    public LongArray spans;
+    public long totSpan;
+    public string name;
     public ExerciseJsonData(QuestionSetJsonData data) : base(data) { }
 }
+/*
 [System.Serializable]
 public class ExerciseResultJsonData {
-    public SubjectJsonData[] increment; 
-    public int score;
-    public int[][] selections;
-    public long[] spans;
-    public long totSpan;
+}
+*/
+[System.Serializable]
+public class ExerciseRespondJsonData {
+    public QuestionJsonDataArray data;
+
+    public static ExerciseRespondJsonData fromJson(string json) {
+        Debug.Log("fromJson: " + json);
+        return JsonUtility.FromJson<ExerciseRespondJsonData>(json);
+    }
+    /*
+    public ExamRespondJsonData(RespondJsonData data) {
+        Debug.Log("ExamRespondJsonData");
+        Debug.Log(data.getJson());
+        ExamRespondJsonData self = 
+        this.data = self.data;
+        Debug.Log(this.data);
+        Debug.Log("JSON:" + JsonUtility.ToJson(this.data));
+    }*/
 }
 
+
 public class Exercise : QuestionSet {
-	/*
+    /*
 	Player		player;		// 玩家
 	DateTime	date;		// 开始日期
 	DateTime	startTime;	// 开始时间（用于计时）
@@ -26,8 +49,9 @@ public class Exercise : QuestionSet {
 	int			subjectId;	// 科目代号（一次刷题仅刷一个科目）
 	Question[]	questions;	// 题目
 	bool		finished;	// 是否完成
-	*/	
-
+	*/
+	bool		   deleted;	// 是否删除
+    string         name;    // 刷题命名
 	ExerciseResult result;	// 刷题结果
 
     static readonly string[][] FeelingTexts = {
@@ -52,7 +76,18 @@ public class Exercise : QuestionSet {
   		return e.date.CompareTo(date);
     }
 
-	public Subject[] getIncr() {return finished ? result.increment : null; }
+    public void delete() { deleted = true; }
+    public void refresh() { deleted = false; }
+    public bool isDeleted() { return deleted; }
+
+    public string generateName() {
+        return name = GameSystem.getCurDate().ToString("yyyy 年 MM 月 dd 日\n") + 
+            "第 " + GameSystem.getDailyExeCnt() + " 次刷题记录 —— " +
+             Subject.SubjectName[getSubjectId()];
+    }
+    public string getName() { return name; }
+
+    public Subject[] getIncr() {return finished ? result.increment : null; }
     public int getScore() { return finished ? result.score : 0; }
     public int[] getSelections(int id) {
 		return finished ? result.selections[id] : null;
@@ -64,7 +99,7 @@ public class Exercise : QuestionSet {
     public int getCrtCnt() {
         int res = 0;
         for(int i = 0; i < questions.Length; i++) {
-            Question q = questions[i];
+            Question q = DataSystem.getQuestionById(questions[i]);
             int[] sel = result.selections[i];
             res += (q.isCorrect(sel) ? 1 : 0);
         }
@@ -72,14 +107,29 @@ public class Exercise : QuestionSet {
     }
     public int getNewQuestionCnt() {
         int res = 0;
-        foreach (Question q in questions)
+        foreach (int qid in questions) {
+            Question q = DataSystem.getQuestionById(qid);
             res += q.haveOccurredWhenTerminated() ? 0 : 1;
+        }
         return res;
     }
     public int getEnergyCost() {
         int res = 0;
-        foreach (Question q in questions)
+        foreach (int qid in questions) {
+            Question q = DataSystem.getQuestionById(qid);
             res += q.getEnergyCost();
+        }
+        return res;
+    }
+    public int getPressurePlus() {
+        if (!finished) return 0;
+        int res = 0;
+        for (int i = 0; i < questions.Length; i++) {
+            Question q = DataSystem.getQuestionById(questions[i]);
+            int[] sel = result.selections[i];
+            bool corr = q.isCorrect(sel);
+            res += q.getPressurePlus(corr);
+        }
         return res;
     }
     public string generateExerciseFeel() {
@@ -107,7 +157,8 @@ public class Exercise : QuestionSet {
 
     public new ExerciseJsonData toJsonData() {
         ExerciseJsonData data = new ExerciseJsonData(base.toJsonData());
-        data.result = getResultData();
+        data.deleted = deleted;
+        getResultData(data);
         return data;
     }
     public override bool fromJsonData(QuestionSetJsonData data) {
@@ -115,33 +166,34 @@ public class Exercise : QuestionSet {
     }
     public bool fromJsonData(ExerciseJsonData data) {
         if (!base.fromJsonData(data)) return false;
-        return loadStatData(data.result);
+        deleted = data.deleted;
+        return loadResultData(data);
     }
-    public ExerciseResultJsonData getResultData() {
-        ExerciseResultJsonData data = new ExerciseResultJsonData();
+    public void getResultData(ExerciseJsonData data) {
         int cnt = result.increment.Length;
+        data.name = name;
         data.score = result.score;
-        data.selections = result.selections;
+        data.selections = new IntArray2D(result.selections);
         data.totSpan = result.totSpan.Ticks;
-        data.increment = new SubjectJsonData[cnt];
+        data.increment = new SubjectJsonDataArray();
         for (int i = 0; i < cnt; i++)
-            data.increment[i] = result.increment[i].toJsonData();
+            data.increment.Add(result.increment[i].toJsonData());
         cnt = result.spans.Length;
-        data.spans = new long[cnt];
+        data.spans = new LongArray();
         for (int i = 0; i < cnt; i++)
-            data.spans[i] = result.spans[i].Ticks;
-        return data;
+            data.spans.Add(result.spans[i].Ticks);
     }
-    public bool loadStatData(ExerciseResultJsonData data) {
-        int cnt = data.increment.Length;
+    public bool loadResultData(ExerciseJsonData data) {
+        int cnt = data.increment.Count;
+        name = data.name;
         result = new ExerciseResult();
         result.score = data.score;
-        result.selections = data.selections;
+        result.selections = data.selections.ToArray2D();
         result.totSpan = new TimeSpan(data.totSpan);
         result.increment = new Subject[cnt];
         for (int i = 0; i < cnt; i++)
             result.increment[i] = new Subject(data.increment[i]);
-        cnt = data.spans.Length;
+        cnt = data.spans.Count;
         result.spans = new TimeSpan[cnt];
         for (int i = 0; i < cnt; i++)
             result.spans[i] = new TimeSpan(data.spans[i]);
@@ -166,6 +218,24 @@ public class Exercise : QuestionSet {
     }
     public Exercise(ExerciseJsonData data, Player player = null) : base(data, player) { }
 
+    public void generateQuestions() {
+        Debug.Log("generateQuestions");
+        DataSystem.getExerciseQuestions(subjectId, player, count, type);
+    }
+
+    // 从数据库中获取到的数据
+    public void loadQuestions(ExerciseRespondJsonData data) {
+
+        Debug.Log("loadQuestions");
+        Debug.Log(data.data.Count);
+        questions = new int[data.data.Count];
+        for (int i = 0; i < questions.Length; i++) {
+            Question q = DataSystem.addQuestion(new Question(data.data[i]));
+            questions[i] = q.getId();
+        }
+        initializeResult();
+    }
+
     public override void terminate(){
 		DateTime now = DateTime.Now;
 		TimeSpan span = now - startTime;
@@ -175,14 +245,18 @@ public class Exercise : QuestionSet {
 		base.terminate();
 	}
     void filterQuestions() {
-        List<Question> qs = new List<Question>();
+        List<int> qs = new List<int>();
         int cnt = questions.Length;
         for (int i = 0; i < cnt; i++) {
             Debug.Log("i = " + i);
+            Debug.Log(questions[i]);
             if (result.selections[i] != null)
                 qs.Add(questions[i]);
         }
         questions = qs.ToArray();
+        Debug.Log("QS:"+qs[0]);
+        Debug.Log(questions[questions.Length-1]);
+        Debug.Log(questions[0]);
     }
 
     protected override void initializeResult(){
@@ -200,14 +274,22 @@ public class Exercise : QuestionSet {
 		//TimeSpan span = now - startTime;
 		result.spans[qid] = span;
 		result.selections[qid] = selection;
-		result.score += questions[qid].processAnswer(selection, span, date);
-		dealEnergyCost(qid);
-	}
+        Question q = DataSystem.getQuestionById(questions[qid]);
+		result.score += q.processAnswer(selection, span, date);
+        dealEnergyCost(qid);
+        dealPressurePlus(qid, selection);
+    }
 
-	void dealEnergyCost(int qid){
-		player.changeEnergy(-questions[qid].getEnergyCost());
-	}	
-	void dealIncrement(){
+    void dealEnergyCost(int qid) {
+        Question q = DataSystem.getQuestionById(questions[qid]);
+        player.changeEnergy(-q.getEnergyCost());
+    }
+    void dealPressurePlus(int qid, int[] sel) {
+        Question q = DataSystem.getQuestionById(questions[qid]);
+        bool corr = q.isCorrect(sel);
+        player.changePressure(q.getPressurePlus(corr));
+    }
+    void dealIncrement(){
 		resetIncrement(); calcIncrement();
 		int[] set = Subject.DefaultMultSubjectSet[subjectId];
 		for(int i=0;i<set.Length;i++)
@@ -219,13 +301,16 @@ public class Exercise : QuestionSet {
 			result.increment[i].resetPoint();
 	}
 	// 计算科目点数增量
-	void calcIncrement(){	
+	void calcIncrement(){
+        Debug.Log("====== calcIncrement ======");
 		int value = player.getSubjectParamValue(subjectId);
+        Debug.Log("Value of " + subjectId + " = " + value);
 		for(int i=0;i<questions.Length;i++){
-			Question q = questions[i];
+			Question q = DataSystem.getQuestionById(questions[i]);
 			int[] sel = result.selections[i];
             TimeSpan span = result.spans[i];
-			Subject incre = calcQuestionIncre(span, value, q, sel);
+            Debug.Log("Question " + i + ": Span: " + span);
+            Subject incre = calcQuestionIncre(span, value, q, sel);
 			for(int j=0;j<result.increment.Length;j++)
 				result.increment[j].addPoint(incre);
 		}
@@ -239,10 +324,15 @@ public class Exercise : QuestionSet {
 		bool corr = q.isCorrect(sel);
 		double base_ = Question.IncreBase[level];
 		int entry = Question.EntryValue[level];
+        Debug.Log("base = " + base_ + ", entry = " + entry);
 		base_ *= calcCountEffect(count);
-		base_ *= calcValueEffect(value,entry);
-		base_ *= calcCorrEffect(corr);
-		base_ *= calcDisperEffect();
+        Debug.Log("calcCountEffect("+count+") = " + base_);
+        base_ *= calcValueEffect(value,entry);
+        Debug.Log("calcValueEffect(" + value + "," + entry + ") = " + base_);
+        base_ *= calcCorrEffect(corr);
+        Debug.Log("calcCorrEffect(" + corr + ")  = " + base_);
+        base_ *= calcDisperEffect();
+        Debug.Log("calcDisperEffect = " + base_);
         if (min <= Question.LevelMinMinute[level]) base_ *= ShortTimeRate;
         sbj.addPoint(Mathf.RoundToInt((float)base_));
 		return sbj;
@@ -254,7 +344,8 @@ public class Exercise : QuestionSet {
 		return Mathf.Pow((float)FactorA, (float)(count*1.0/FactorK1));
 	}
 	double calcValueEffect(int value, int entry){
-		return (1-sigmoid(Mathf.Sqrt((float)(value-entry))/FactorK2))*2;
+        if (value < entry) return 1;
+		return (1-sigmoid(Mathf.Sqrt((value-entry))/FactorK2))*2;
 	}
 	double calcCorrEffect(bool corr){
 		return corr ? FactorC : FactorW;

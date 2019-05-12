@@ -13,16 +13,18 @@ public class AnimatableLayer : MonoBehaviour {
 
     protected const float stopMoveDist = 0.1f;
     protected const float stopRotaDist = 1f;
-    protected const float stopScaleDist = 0.05f;
+    protected const float stopScaleDist = 0.01f;
     protected const float stopResizeDist = 0.02f;
     protected const float stopColorDist = 0.01f;
 
-    const string TestObjectName = "";
+    const string TestObjectName = "DifficultyInfo";
 
     new protected string animation;
 
     public GameObject background;
     public Image image;
+
+    public AnimatableLayer[] infos = new AnimatableLayer[0];
 
     UnityAction action;
     protected UIBaseLayer uiBaseLayer;
@@ -52,6 +54,8 @@ public class AnimatableLayer : MonoBehaviour {
 
     void OnDisable() {
         if (background) background.SetActive(false);
+        foreach (AnimatableLayer obj in infos)
+            obj.hideWindow();
     }
 
     void updateBackground() {
@@ -87,19 +91,25 @@ public class AnimatableLayer : MonoBehaviour {
     }
     void updateRotationAnimation() {
         if (gameObject.name == TestObjectName)
-            Debug.Log("Rotation: " + targetRotation + " ← " + transform.eulerAngles);
+            Debug.Log("Position: " + targetRotation + " ← " + transform.eulerAngles +
+                " Distance = " + Vector3.Distance(transform.eulerAngles, targetRotation) +
+                " StopMove = " + stopRotaDist);
         transform.rotation = Quaternion.Slerp(transform.rotation,
             Quaternion.Euler(targetRotation), rotateSpeed);
     }
     void updateScaleAnimation() {
         if (gameObject.name == TestObjectName)
-            Debug.Log("Scale: " + targetScale + " ← " + transform.localScale);
+            Debug.Log("Position: " + targetScale + " ← " + transform.localScale +
+                " Distance = " + Vector3.Distance(transform.localScale, targetScale) +
+                " StopMove = " + stopScaleDist);
         transform.localScale += (targetScale - transform.localScale) * scaleSpeed;
     }
     void updateSizeAnimation() {
         Vector2 size = rectToSize();
         if (gameObject.name == TestObjectName)
-            Debug.Log("Size: " + targetSize + " ← " + size);
+            Debug.Log("Position: " + targetSize + " ← " + size +
+                " Distance = " + Vector3.Distance(size, targetSize) +
+                " StopMove = " + stopResizeDist);
         size += (targetSize - size) * resizeSpeed;
         GameUtils.setRectWidth(rectTransform, size.x);
         GameUtils.setRectHeight(rectTransform, size.y);
@@ -140,9 +150,9 @@ public class AnimatableLayer : MonoBehaviour {
         stopAnimation(force);
     }
     void resetGeneralAnimation() {
-        if (posAniEnable()) transform.localScale = targetScale;
-        if (rotAniEnable()) transform.position = targetPosition;
-        if (sclAniEnable()) transform.eulerAngles = targetRotation;
+        if (posAniEnable()) transform.position = targetPosition;
+        if (rotAniEnable()) transform.eulerAngles = targetRotation;
+        if (sclAniEnable()) transform.localScale = targetScale; 
         if (resAniEnable()) {
             GameUtils.setRectWidth(rectTransform, targetSize.x);
             GameUtils.setRectHeight(rectTransform, targetSize.y);
@@ -209,75 +219,105 @@ public class AnimatableLayer : MonoBehaviour {
     // Base Animation
     public void moveTo(Vector3 pos, string ani = null, UnityAction act = null) {
         if (!posAniEnable()) return;
+        if (gameObject.name == TestObjectName)
+            Debug.Log("moveTo(" + pos + ")");
         targetPosition = pos;
         setAnimation(ani);
         setAction(act);
     }
     public void moveDelta(Vector3 pos, string ani = null, UnityAction act = null) {
         if (!posAniEnable()) return;
+        if (gameObject.name == TestObjectName)
+            Debug.Log("moveDelta(" + pos + ")");
         moveTo(transform.position + pos, ani, act);
     }
     public void rotateTo(Vector3 rot, string ani = null, UnityAction act = null) {
         if (!rotAniEnable()) return;
+        if (gameObject.name == TestObjectName)
+            Debug.Log("rotateTo(" + rot + ")");
         targetRotation = rot;
         setAnimation(ani);
         setAction(act);
     }
     public void rotateDelta(Vector3 rot, string ani = null, UnityAction act = null) {
         if (!rotAniEnable()) return;
+        if (gameObject.name == TestObjectName)
+            Debug.Log("rotateDelta(" + rot + ")");
         moveTo(transform.eulerAngles + rot, ani, act);
     }
     public void scaleTo(Vector3 scale, string ani = null, UnityAction act = null) {
         if (!sclAniEnable()) return;
+        if (gameObject.name == TestObjectName)
+            Debug.Log("scaleTo(" + scale + ")");
         targetScale = scale;
         setAnimation(ani);
         setAction(act);
     }
     public void scaleDelta(Vector3 scale, string ani = null, UnityAction act = null) {
         if (!sclAniEnable()) return;
+        if (gameObject.name == TestObjectName)
+            Debug.Log("scaleDelta(" + scale + ")");
         moveTo(transform.localScale + scale, ani, act);
     }
     public void resizeTo(Vector2 size, string ani = null, UnityAction act = null) {
         if (!resAniEnable()) return;
+        if (gameObject.name == TestObjectName)
+            Debug.Log("resizeTo(" + size + ")");
         targetSize = size;
         setAnimation(ani);
         setAction(act);
     }
     public void resizeDelta(Vector2 size, string ani = null, UnityAction act = null) {
         if (!resAniEnable()) return;
+        if (gameObject.name == TestObjectName)
+            Debug.Log("resizeDelta(" + size + ")");
         resizeTo(rectToSize() + size, ani, act);
     }
     public void colorTo(Color color, string ani = null, UnityAction act = null) {
         if (!colAniEnable()) return;
+        if (gameObject.name == TestObjectName)
+            Debug.Log("colorTo(" + color + ")");
         targetColor = color;
         setAnimation(ani);
         setAction(act);
     }
     public void colorDelta(Color color, string ani = null, UnityAction act = null) {
         if (!colAniEnable()) return;
+        if (gameObject.name == TestObjectName)
+            Debug.Log("colorDelta(" + color + ")");
         resizeTo((Vector4)image.color + (Vector4)color, ani, act);
     }
 
     // Default Animation
-    void onWindowHidden() {
+    protected virtual void onWindowShown() {
+    }
+    protected virtual void onWindowHidden() {
         gameObject.SetActive(false);
         //if (background) background.SetActive(false);
     }
-    public void showWindow(Vector3? scale) {
+    public void showWindow(UnityAction act, Vector3? scale) {
         scale = scale ?? new Vector3(1, 1, 1);
         //if (background) background.SetActive(true);
         gameObject.SetActive(true);
-        scaleTo((Vector3)scale, "show");
+        scaleTo((Vector3)scale, "show", () => {
+            onWindowShown(); if (act != null) act.Invoke();
+        });
+    }
+    public void showWindow(Vector3? scale) {
+        showWindow(null, scale);
     }
     public void showWindow() {
         showWindow(null);
     }
+
     public void hideWindow(UnityAction act, Vector3? scale){// = default(Vector3)) {
         scale = scale ?? new Vector3(0, 0, 0);
         //if (scale == default(Vector3)) scale = new Vector3(0, 0, 0);
         scaleTo((Vector3)scale, "hide", () => {
             onWindowHidden(); if (act != null) act.Invoke();
         });
+        foreach (AnimatableLayer obj in infos)
+            obj.hideWindow();
     }
     public void hideWindow(Vector3? scale) {
         hideWindow(null, scale);

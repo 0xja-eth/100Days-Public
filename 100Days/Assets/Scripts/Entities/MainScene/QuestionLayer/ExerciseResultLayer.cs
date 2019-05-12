@@ -27,9 +27,7 @@ public class ExerciseResultLayer : AnimatableLayer {
     public void setExercise(Exercise e) {
         exercise = e;
         player = GameSystem.getPlayer();
-        title.text = GameSystem.getCurDate().ToString("yyyy 年 MM 月 dd 日\n");
-        title.text += "第 "+GameSystem.getDailyExeCnt()+" 次刷题记录 —— "+
-            Subject.SubjectName[e.getSubjectId()];
+        title.text = e.getName();
         name_.text = "姓名：<size=30>" + player.getName() + "</size>";
         //detail1.text = detail2.text = "";
         generateExerciseDetail();
@@ -49,7 +47,8 @@ public class ExerciseResultLayer : AnimatableLayer {
 
         t2 += "正确数：" + crtcnt + "\n";
         t2 += "正确率：" + Mathf.Round((float)crtcnt/cnt * 10000) / 100 + "%\n";
-        t2 += "新题目：" + exercise.getNewQuestionCnt();
+        t2 += "新题目：" + exercise.getNewQuestionCnt() + "\n";
+        t2 += "压力增加：" + exercise.getPressurePlus();
 
         detail1.text = t1;
         detail2.text = t2;

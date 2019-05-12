@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 
 public class MenuLayer : AnimatableLayer { 
     const int initialHeight = 88;
-    const int extendHeight = 270;
+    const int extendHeight = 316;
     
     new const float resizeSpeed = 0.18f;
     new const float stopResizeDist = 1f;

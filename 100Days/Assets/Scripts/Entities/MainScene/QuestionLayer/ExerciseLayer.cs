@@ -82,29 +82,38 @@ public class ExerciseLayer : QuestionDisplayer {
 	void disableNextPageButton(){
 		Button btn = GameUtils.button(nextBtn);
 		btn.interactable = false;
-	}
-	void changeNextPageButton(){
-		Text btnTxt = GameUtils.find<Text> (nextBtn,"Text");
-		btnTxt.text = "提交";
-	}
+    }
+    void changeNextPageButton() {
+        Text btnTxt = GameUtils.find<Text>(nextBtn, "Text");
+        btnTxt.text = "提交";
+    }
+    void resetNextPageButton() {
+        Text btnTxt = GameUtils.find<Text>(nextBtn, "Text");
+        btnTxt.text = "下一题";
+    }
+    new public void deactivateButtonsLayer() {
+        base.deactivateButtonsLayer();
+        resetNextPageButton();
+    }
 
-	public void nextPage(){
+    public void nextPage(){
         if (!pushSelection()) return;
         if (quesPointer >= quesCount - 1) finishExercise();
         else {
-            Question nq = exercise.getQuestion(quesPointer + 1);
+            Question nq = exercise.getQuestionObject(quesPointer + 1);
             if (checkExerciseEnable(nq)) setPointer(quesPointer + 1);
         }
 	}
 
 	public void setPointer(int index){
 		quesPointer = Mathf.Clamp(index,0,quesCount-1);
-		setQuestion(quesPointer, exercise.getQuestion(quesPointer));
+		setQuestion(quesPointer, exercise.getQuestionObject(quesPointer));
         if (quesPointer >= quesCount - 1) changeNextPageButton();
     }
 
 	public void setExercise(Exercise e) {
         player = GameSystem.getPlayer();
+        resetNextPageButton();
         //paperPositionReset()
         gameObject.SetActive(true);
 		exercise = e;
@@ -124,10 +133,12 @@ public class ExerciseLayer : QuestionDisplayer {
     }
     public void setQuestion(int index, Question q) {
         quesTime = DateTime.Now;
-        LinkImageText queText = GameUtils.get<LinkImageText>(question);
+        TextExtend queText = GameUtils.get<TextExtend>(question);
+
+        GameUtils.setTexturePool(q.getPictures());
 
         subject.text = getSubjectText(q);
-        queText.text = getQuestionTextInExercise(index, q);
+        queText.text = getQuestionTextInExercise(index, q, queText.fontSize);
 
         int cnt = q.getChoiceCount(); clearChoices();
         for (int i = 0; i < cnt; i++) createChoice(i, q);
@@ -181,11 +192,11 @@ public class ExerciseLayer : QuestionDisplayer {
     }
 
     public void onExerciseExhausted() {
-        GameUtils.alert("当前精力值过低 ( "+player.getEnergy()+" )，不足以继续刷题。\n点击确认结束刷题并进入结果界面。",
+        GameUtils.alert("当前精力值过低 ( "+player.getEnergy()+" )，不足以继续刷题。\n点击确认提交题目并结束刷题并进入结果界面。",
             new string[] { null, "确认" }, new UnityAction[] { null, onExerciseQuit });
     }
     public void exerciseQuit() {
-        GameUtils.alert("刷题尚未完成，确定要退出吗？",
+        GameUtils.alert("刷题尚未完成，确定要提交本题目并退出吗？",
             new string[] { null, "是", "否" },
             new UnityAction[] { null, onExerciseQuit, null });
     }
@@ -194,8 +205,11 @@ public class ExerciseLayer : QuestionDisplayer {
         exercise.terminate();
         GameSystem.addDailyExeCnt();
         RecordSystem.recordExercise(exercise);
+        exercise.generateName();
 
-        exerciseResultLayer.setExercise(exercise);
+        NetworkSystem.setSuccessHandler((data)=> {
+            exerciseResultLayer.setExercise(exercise);
+        });
         StorageSystem.saveGame();
     }
 

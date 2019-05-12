@@ -17,6 +17,9 @@ class ErrorType(Enum):
 	PlayerExist			= 21 # 玩家已存在
 	SchoolNotExist		= 22 # 学校不存在
 
+	# Question
+	QuestionNoAnswer	= 30 # 题目无答案
+
 class ErrorException(Exception):
 
 	error_dict = {
@@ -34,7 +37,10 @@ class ErrorException(Exception):
 		# Player
 		ErrorType.PlayerNotExist:	"玩家不存在！",
 		ErrorType.PlayerExist:		"玩家已存在！",
-		ErrorType.SchoolNotExist:	"玩家不存在！",
+		ErrorType.SchoolNotExist:	"学校不存在！",
+
+		# Question
+		ErrorType.QuestionNoAnswer:	"题目无答案！",
 	}
 
 	def __init__(self, error_type: ErrorType):

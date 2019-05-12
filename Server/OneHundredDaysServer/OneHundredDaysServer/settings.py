@@ -25,7 +25,7 @@ SECRET_KEY = '2%pwilobn@!cdv=14jep5n-5+(@-j+zv!ad@m)!debjpdzb$r='
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = ['*',]
 
 HTML_TEST = True
 
@@ -137,6 +137,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATIC_BASE = 'static'
 
 SAVEFILE_SALT = 'R0cDovMzgwLTE2Lm1pZAl'
 

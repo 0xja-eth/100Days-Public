@@ -29,7 +29,7 @@ public class Subject {
 		new int[] {8}, new int[] {3,4,5}, new int[] {6,7,8}
 	};	
 	public static readonly int[] MaxScores = {
-		150, 150, 150, 110, 100, 90, 100, 100, 100, 300, 300
+		150, 150, 150, 110, 100, 90, 100, 100, 100, 750, 300, 300
 	}; // 每科目最高成绩
 
 

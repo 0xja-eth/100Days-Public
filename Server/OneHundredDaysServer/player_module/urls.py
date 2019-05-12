@@ -21,6 +21,7 @@ from player_module import views
 urlpatterns = [
     path('player/create', views.player_create),
     path('player/save', views.player_save),
+    path('player/delete', views.player_delete),
     path('school/get', views.school_get),    
 ]
 """

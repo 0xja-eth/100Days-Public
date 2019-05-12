@@ -40,7 +40,23 @@ public class CameraControl : MonoBehaviour {
 					Quaternion.Euler(targetRot), rotateSpeed);
 				if(isStopping()) stopMove();
 				break;
-			case "toward":
+            case "curve":
+                //两者中心点  
+                Vector3 center = (transform.position + targetPos) * 0.5f;
+
+                center -= new Vector3(0, 1, 0);
+
+                Vector3 start = transform.position - center;
+                Vector3 end = targetPos - center;
+
+                //弧形插值  
+                transform.position = Vector3.Slerp(start, end, Time.time);
+                transform.position += center*moveSpeed;
+                transform.rotation = Quaternion.Slerp(transform.rotation,
+                    Quaternion.Euler(targetRot), rotateSpeed);
+                if (isStopping()) stopMove();
+                break;
+            case "toward":
 				transform.position += (targetPos-transform.position)*moveSpeed;
 				transform.rotation = Quaternion.Slerp(
 					transform.rotation, Quaternion.LookRotation(
@@ -75,13 +91,17 @@ public class CameraControl : MonoBehaviour {
 		}
 		if(this.callback!=null) this.callback();
 		this.callback = null;
-	}
-
-	public void moveTo(Vector3 position, Vector3 rotation){
-		moveType = "normal";
-		targetPos = position; targetRot = rotation;
     }
-	public void moveToward(Vector3 position, Vector3 faceTo){
+
+    public void moveTo(Vector3 position, Vector3 rotation) {
+        moveType = "normal";
+        targetPos = position; targetRot = rotation;
+    }
+    public void curveTo(Vector3 position, Vector3 rotation) {
+        moveType = "curve";
+        targetPos = position; targetRot = rotation;
+    }
+    public void moveToward(Vector3 position, Vector3 faceTo){
 		moveType = "toward";
 		targetPos = position; lookVector = faceTo;
 	}

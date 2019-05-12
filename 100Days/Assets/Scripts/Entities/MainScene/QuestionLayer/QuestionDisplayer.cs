@@ -10,11 +10,7 @@ public class QuestionDisplayer : AnimatableLayer {
 
     public GameObject buttons;
 
-    public const string spaceIdentifier = "&S&";
-    public const string starIdentifier = "<quad" +
-        spaceIdentifier + "name=Star" + spaceIdentifier + "size=13" +
-        spaceIdentifier + "width=1" + spaceIdentifier + "/>";
-    const string spaceEncode = "\u00A0";
+    public const string starIdentifier = "<quad name=Star size={0} width=1 />";
     const string lineSpliter = "_______________________________\n\n";
 
     protected Player player;
@@ -31,26 +27,28 @@ public class QuestionDisplayer : AnimatableLayer {
             text += starIdentifier;
         return text;
     }
-    protected string getQuestionTextInExercise(int index, Question q) {
+    protected string getQuestionTextInExercise(int index, Question q, int fsize = 14) {
         string typeText = Question.TypeText[(int)q.getType()];
         string text = index+1 + ". (" + typeText + ")  ";
         text += getLevelText(q.getLevel()) + "\n";
+        text = string.Format(text, fsize + 2);
         text += q.getTitle();
-        return adjustText(text);
+        return GameUtils.adjustText(text);
     }
-    protected string getQuestionTextInAnswer(int index, Question q) {
+    protected string getQuestionTextInAnswer(int index, Question q, int fsize = 14) {
         string typeText = Question.TypeText[(int)q.getType()];
-        string text = index+1 + ". (" + typeText + ")  ";
+        string text = index + 1 + ". (" + typeText + ")  ";
         text += getLevelText(q.getLevel()) + "\n";
+        text = string.Format(text, fsize + 2);
         text += q.getTitle() + "\n";
 
         int cnt = q.getChoiceCount();
         for (int i = 0; i < cnt; i++)
-            text += getQuestionChoiceText(i, q)+"\n";
+            text += getQuestionChoiceText(i, q) + "\n";
         text += lineSpliter;
-        return adjustText(text);
+        return GameUtils.adjustText(text);
     }
-    protected string getDescriptionText(int index, Question q, int[] sels) {
+    protected string getDescriptionText(Question q, int[] sels) {
         int[] corr = q.getCrtSelection();
         int score = q.calcScore(sels);
         bool correct = score == q.getScore();
@@ -61,12 +59,23 @@ public class QuestionDisplayer : AnimatableLayer {
         text += "\n本题用时：" + GameUtils.time2Str(q.getLastTime());
         text = "<color=" + color + ">" + text + "</color>";
         text += "\n题解：\n" + q.getDesc();
-        return adjustText(text);
+        return GameUtils.adjustText(text);
+    }
+    protected string getDescriptionText(Question q) {
+        int[] corr = q.getCrtSelection();
+        string text = getSelectionText("\n正确答案：", corr);
+        text += "\n做题次数：" + q.getCount();
+        text += "\n上次用时：" + GameUtils.time2Str(q.getLastTime());
+        text += "\n平均用时：" + GameUtils.time2Str(q.getAvgTime());
+        text += "\n正确次数：" + q.getCrtCnt();
+        text += "\n正确率　：" + Mathf.Round((float)q.getCrtRate() * 10000) / 100 + "%";
+        text += "\n题解：\n" + q.getDesc();
+        return GameUtils.adjustText(text);
     }
     protected string getQuestionChoiceTextWithAdjust(int index, Question q) {
         string choiceText = q.getChoiceText(index);
         string text = (char)('A' + index) + ". " + choiceText;
-        return adjustText(text);
+        return GameUtils.adjustText(text);
     }
     protected string getQuestionChoiceText(int index, Question q) {
         string choiceText = q.getChoiceText(index);
@@ -78,14 +87,14 @@ public class QuestionDisplayer : AnimatableLayer {
         return title;
     }
     protected string getSubjectText(Question q) {
-        return adjustText(Subject.SubjectName[q.getSubjectId()]);
+        return GameUtils.adjustText(Subject.SubjectName[q.getSubjectId()]);
     }
     protected string getQuestionStatText(Question q) {
         string text = "做题次数  " + q.getCount() + "\n";
         text += "正确次数  " + q.getCrtCnt() + "\n";
         text += "正确率　  " + Mathf.Round((float)q.getCrtRate()*10000)/100 + "%\n";
         text += "平均用时  " + GameUtils.time2Str(q.getAvgTime());
-        return adjustText(text);
+        return GameUtils.adjustText(text);
     }
     protected void setRectWidth(RectTransform rt, float w) {
         GameUtils.setRectWidth(rt, w);
@@ -93,11 +102,7 @@ public class QuestionDisplayer : AnimatableLayer {
     protected void setRectHeight(RectTransform rt, float h) {
         GameUtils.setRectHeight(rt, h);
     }
-    protected string adjustText(string text) {
-        text = text.Replace(" ", spaceEncode);
-        text = text.Replace(spaceIdentifier, " ");
-        return text.ToString();
-    }
+
 
     public void activateButtonsLayer() {
         buttons.SetActive(true);

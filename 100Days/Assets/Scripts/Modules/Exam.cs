@@ -5,20 +5,25 @@ using UnityEngine;
 
 [System.Serializable]
 public class ExamJsonData : QuestionSetJsonData {
-    public ExamResultJsonData result;
+    //public ExamResultJsonData result;
+
+    public int score;
+    public int finalScore;
+    public IntArray subFinScore;
+    public IntArray2D selections;
+    public long totSpan;
+
     public ExamJsonData(QuestionSetJsonData data):base(data) {}
 }
+/*
 [System.Serializable]
 public class ExamResultJsonData {
-    public int score;          
-    public int finalScore;     
-    public int[] subFinScore;  
-    public int[][] selections; 
-    public long totSpan;
 }
+*/
 
 public class Exam : QuestionSet {
 	string		name;		// 考试名称
+    ExamSet     examSet;    // 考试集
 	TimeSpan	timeLtd;	// 时间限制
 	ExamResult	result;		// 考试结果
 
@@ -52,7 +57,7 @@ public class Exam : QuestionSet {
     }
     public int findQuestionIndex(Question q) {
         for (int i = 0; i < questions.Length; i++)
-            if (questions[i].getId() == q.getId())
+            if (questions[i] == q.getId())
                 return i;
         return -1;
     }
@@ -71,7 +76,8 @@ public class Exam : QuestionSet {
 
     public new ExamJsonData toJsonData() {
         ExamJsonData data = new ExamJsonData(base.toJsonData());
-        data.result = getResultData();
+        getResultData(data);
+        Debug.Log("ExamJsonData:" + JsonUtility.ToJson(data));
         return data;
     }
     public override bool fromJsonData(QuestionSetJsonData data) {
@@ -79,23 +85,21 @@ public class Exam : QuestionSet {
     }
     public bool fromJsonData(ExamJsonData data) {
         if (!base.fromJsonData(data)) return false;
-        return loadStatData(data.result);
+        return loadResultData(data);
     }
-    public ExamResultJsonData getResultData() {
-        ExamResultJsonData data = new ExamResultJsonData();
+    public void getResultData(ExamJsonData data) {
         data.score = result.score;
         data.finalScore = result.finalScore;
-        data.subFinScore = result.subFinScore;
-        data.selections = result.selections;
+        data.subFinScore = new IntArray(result.subFinScore);
+        data.selections = new IntArray2D(result.selections);
         data.totSpan = result.totSpan.Ticks;
-        return data;
     }
-    public bool loadStatData(ExamResultJsonData data) {
+    public bool loadResultData(ExamJsonData data) {
         result = new ExamResult();
         result.score = data.score;
         result.finalScore = data.finalScore;
-        result.subFinScore = data.subFinScore;
-        result.selections = data.selections;
+        result.subFinScore = data.subFinScore.ToArray();
+        result.selections = data.selections.ToArray2D();
         result.totSpan = new TimeSpan(data.totSpan);
         return true;
     }
@@ -103,13 +107,22 @@ public class Exam : QuestionSet {
     // timeLtd : 时间限制（单位：分钟）
     public Exam(string name, int subjectId, int timeLtd,
 		DataSystem.QuestionDistribution.Type type, int[] levelDtb,
-		Player player = null, DateTime date = default(DateTime)):
+        ExamSet examSet=null, Player player = null, DateTime date = default(DateTime)):
 		base(0, subjectId, type, levelDtb, player, date) {
-			this.name = name;
-			this.timeLtd = new TimeSpan(0, timeLtd, 0);
-		}
+		this.name = name;
+        this.examSet = examSet;
+        this.timeLtd = new TimeSpan(0, timeLtd, 0);
+    }
 
-    public Exam(ExamJsonData data, Player player = null) : base(data, player) { }
+    public Exam(ExamJsonData data, ExamSet examSet=null, 
+        Player player = null) : base(data, player) { 
+            this.examSet = examSet;
+        }
+    
+    public void setQuestions(int[] questions) {
+        this.questions = questions;
+        initializeResult();
+    }
 
     public void timeOut(){
 		terminate();
@@ -127,7 +140,8 @@ public class Exam : QuestionSet {
         //TimeSpan span = now - startTime;
         for(int i = 0; i < questions.Length; i++) {
             result.selections[i] = selections[i];
-            result.score += questions[i].processAnswer(selections[i], spans[i], date);
+            Question q = DataSystem.getQuestionById(questions[i]);
+            result.score += q.processAnswer(selections[i], spans[i], date);
         }
     }
 
@@ -135,8 +149,9 @@ public class Exam : QuestionSet {
 		result = new ExamResult();
 		result.score = 0;
 		result.selections = new int[questions.Length][];
-		if(subjectId>=9) result.subFinScore = new int[3];
-	}
+        if (subjectId >= 9) result.subFinScore = new int[3];
+        else result.subFinScore = new int[0];
+    }
 
 	public void setFinalScore(int score){
 		result.finalScore = score;

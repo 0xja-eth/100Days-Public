@@ -4,8 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class ScheduleLayer : AnimatableLayer {
-    const int MinExerciseEnergy = 10;
-    const int MaxNextDayEnergy = 15;
+    public const int MinExerciseEnergy = 10;
+    public const int MinGameEnergy = 10;
+    public const int MaxNextDayEnergy = 25;
 
     public Button exercise, game, friend, end;
 
@@ -32,7 +33,7 @@ public class ScheduleLayer : AnimatableLayer {
         return player.getEnergy() >= MinExerciseEnergy;
     }
     bool gameEnable() {
-        return false;
+        return player.getEnergy() >= MinGameEnergy;
     }
     bool friendEnable() {
         return false;

@@ -19,6 +19,7 @@ public class ExamLayer : QuestionDisplayer {
     public RectTransform question, choices;
     public RectTransform content;
 
+    public UIBaseLayer uiBase;
 
     int quesPointer, examPointer;
     int quesCount, examCount;
@@ -112,6 +113,7 @@ public class ExamLayer : QuestionDisplayer {
         setPointer(quesPointer - 1);
     }
     public void pushAnswer() {
+        recordTimeSpan(quesPointer);
         saveSelection();
         if (pushSelection()) {
             exam.terminate();
@@ -131,17 +133,20 @@ public class ExamLayer : QuestionDisplayer {
         setExam(examSet.getExamById(index));
     }
     public void nextExam() {
-        if(examPointer >= examCount - 1){
+        if (examPointer >= examCount - 1){
             // 刷题完成
             examSet.terminate();
             RecordSystem.recordExamSet(examSet);
-            //gameObject.SetActive(false);
-            //disablePushButton();
-            examResultLayer.setExamSet(examSet);
-            //player.showSubjectParams();
-
+            NetworkSystem.setSuccessHandler(onExamComplete);
             StorageSystem.saveGame();
         } else setExamPointer(examPointer + 1);
+    }
+
+    void onExamComplete(RespondJsonData data) {
+        if (GameSystem.isEmptySchedule()) {
+            GameSystem.setFinalExam((FinalExam)examSet);
+            uiBase.onGameOver();
+        } else examResultLayer.setExamSet(examSet);
     }
 
     public void onPageChange(int last) {
@@ -177,17 +182,19 @@ public class ExamLayer : QuestionDisplayer {
             selections[i] = new int[0];
         for (int i = 0; i < timeSpans.Length; i++)
             timeSpans[i] = new TimeSpan(0);
-        title.text = exam.getName();
+        title.text = GameUtils.adjustText(exam.getName());
         playStartAni();
     }
     public void refreshQuestion() {
         quesTime = DateTime.Now;
 
-        Question q = exam.getQuestion(quesPointer);
-        LinkImageText queText = GameUtils.get<LinkImageText>(question);
+        Question q = exam.getQuestionObject(quesPointer);
+        TextExtend queText = GameUtils.get<TextExtend>(question);
+
+        GameUtils.setTexturePool(q.getPictures());
 
         subject.text = getSubjectText(q);
-        queText.text = getQuestionTextInExercise(quesPointer, q);
+        queText.text = getQuestionTextInExercise(quesPointer, q, queText.fontSize);
 
         int cnt = q.getChoiceCount(); clearChoices();
         for (int i = 0; i < cnt; i++) createChoice(i, q);

@@ -51,7 +51,7 @@ public class ExerciseConfigLayer : AnimatableLayer {
         subject.options.Add(new Dropdown.OptionData("随机"));
         for (int i = 0; i < player.getSubjectCount(); i++)
             subject.options.Add(new Dropdown.OptionData(
-                player.getSubjectParam(i).getName()));
+                player.getSubjectParamById(i).getName()));
         subject.value = 0;
     }
     void initializeModes() {
@@ -92,6 +92,7 @@ public class ExerciseConfigLayer : AnimatableLayer {
         int type = mode.value;
         int cnt = getCurCount();
         if (sid == 0) sid = Random.Range(1, scnt+1);
-        return new Exercise(cnt, sid-1, (DataSystem.QuestionDistribution.Type)type, null, player);
+        sid = player.getSubjectParamById(sid - 1).getId();
+        return new Exercise(cnt, sid, (DataSystem.QuestionDistribution.Type)type, null, player);
     }
 }

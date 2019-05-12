@@ -9,7 +9,7 @@ public class QuestionSetJsonData {
     public string startTime;
     public int count;
     public int subjectId;
-    public int[] questions;
+    public IntArray questions;
     public bool finished;
     public int type;
     public QuestionSetJsonData(QuestionSetJsonData data=null) {
@@ -30,7 +30,7 @@ public class QuestionSet : IComparable<QuestionSet> {
 	protected DateTime		startTime;	// 开始时间（用于计时）
 	protected int			count;		// 题目数量
 	protected int			subjectId;	// 科目代号（一次刷题仅刷一个科目）
-	protected Question[]	questions;	// 题目
+	protected int[]	        questions;	// 题目
 	protected bool			finished;	// 是否完成
 	protected int[]			levelDtb;	// 题目难度分配
 
@@ -46,12 +46,17 @@ public class QuestionSet : IComparable<QuestionSet> {
     public int getCount() {return count; }
     public int getSubjectId() { return subjectId; }
     public int getQuestionCount() {return questions.Length; }
-    public Question getQuestion(int id) { return questions[id]; }
+    public int getQuestion(int id) { return questions[id]; }
+    public Question getQuestionObject(int id) {
+        return DataSystem.getQuestionById(questions[id]);
+    }
 
     public int getSumScore() {
         int score = 0;
-        foreach (Question q in questions)
+        foreach (int qid in questions) {
+            Question q = DataSystem.getQuestionById(qid);
             score += q.getScore();
+        }
         return score;
     }
 
@@ -62,23 +67,23 @@ public class QuestionSet : IComparable<QuestionSet> {
         data.startTime = startTime.ToString();
         data.count = count;
         data.subjectId = subjectId;
-        data.questions = new int[cnt];
-        for (int i = 0; i < cnt; i++)
-            data.questions[i] = questions[i].getId();
+        data.questions = new IntArray();
+        Debug.Log(cnt);
+        for (int i = 0; i < cnt; i++) {
+            Debug.Log(i);
+            Debug.Log(questions[i]);
+            data.questions.Add(questions[i]);
+        }
         data.finished = finished;
         data.type = (int)type;
         return data;
     }
     virtual public bool fromJsonData(QuestionSetJsonData data) {
-        int cnt = data.questions.Length;
         date = Convert.ToDateTime(data.date);
         startTime = Convert.ToDateTime(data.startTime);
         count = data.count;
         subjectId = data.subjectId;
-        questions = new Question[cnt];
-        for (int i = 0; i < cnt; i++)
-            questions[i] = DataSystem.getQuestionById(
-                data.questions[i]);
+        questions = data.questions.ToArray();
         finished = data.finished;
         type = (DataSystem.QuestionDistribution.Type) data.type;
         return true;
@@ -94,8 +99,7 @@ public class QuestionSet : IComparable<QuestionSet> {
 		this.count = (levelDtb==null ? count : clacDtbCount());
 		this.type = type;
 		finished = false;
-		createQuestions();
-		initializeResult();
+		//createQuestions();
 	}
     
     public QuestionSet(QuestionSetJsonData data, Player player = null) {
@@ -110,19 +114,20 @@ public class QuestionSet : IComparable<QuestionSet> {
 		return res;
 	}
 
-	protected virtual void createQuestions(){
-		List<Question> ql = new List<Question>();
+	public virtual void createQuestions(){
+		List<int> ql = new List<int>();
 		foreach(int sid in Subject.DefaultMultSubjectSet[subjectId])
 			ql.AddRange(createQuestionsForSubject(sid));
 		questions = ql.ToArray();
-	}
+        initializeResult();
+    }
 
-	protected virtual List<Question> createQuestionsForSubject(int sid){
-		List<Question> ql = new List<Question>();
+	protected virtual List<int> createQuestionsForSubject(int sid){
+		List<int> ql = new List<int>();
 		if(levelDtb == null) 
-			ql = DataSystem.getQuestions(sid, player, count, type);
+			ql = DataSystem.generateQuestions(sid, player, count, type);
 		else for(int i=0;i<levelDtb.Length;i++)
-			ql.AddRange(DataSystem.getQuestions(
+			ql.AddRange(DataSystem.generateQuestions(
 				sid, player, levelDtb[i], type, i));
 		return ql;
 	}

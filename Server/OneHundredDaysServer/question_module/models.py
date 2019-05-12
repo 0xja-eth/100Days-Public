@@ -1,4 +1,36 @@
 from django.db import models
+from django.conf import settings
+from django.utils.deconstruct import deconstructible
+import os, json, time, datetime, random, base64
+
+@deconstructible
+class PictureUpload:
+
+	def __init__(self, dir):
+		self.dir = dir
+
+	def __call__(self, instance, filename):
+		# 根路径
+		print("PictureUpload")
+		base = os.path.join(settings.BASE_DIR, settings.STATIC_BASE)
+
+		# 文件拓展名
+		ext = '.png' # os.path.splitext(filename)[1]
+
+		# 定义文件名,用户id_年月日时分秒_随机数
+		currtime = time.strftime('%H%M%S')
+		print(currtime)
+		filename = "pic%d_%s_%04d" % (instance.question.id, 
+			currtime, random.randint(0, 9999))
+
+		print(filename)
+		# 保存路径
+		path = os.path.join(base, self.dir, filename+ext)
+		print(path)
+
+		#instance.save_changed = True
+
+		return path
 
 # Create your models here.
 class QuestionType(models.Model):
@@ -52,17 +84,34 @@ class QuestionPicture(models.Model):
 	"""
 	题目图片
 	"""
-	file = models.ImageField(upload_to='picture/question')
+	file = models.ImageField(upload_to=PictureUpload('pictures'))
 
 	question = models.ForeignKey('Question', null=False, on_delete=models.CASCADE)
 
 	def __str__(self):
-		return self.file
+		return self.file.url
 
 	def questionId(self):
 		if self.question == None:
 			return ''
 		return self.question.id
+
+	# 获取完整路径
+	def getExactlyPath(self):
+		base = settings.STATIC_URL
+		path = os.path.join(base, str(self.file))
+		if os.path.exists(path):
+			return path
+		else:
+			raise ErrorException(ErrorType.FileNotFound)
+
+	# 获取视频base64编码
+	def convertToBase64(self):
+
+		with open(self.getExactlyPath(), 'rb') as f:
+			data = base64.b64encode(f.read())
+
+		return data.decode()
 
 class Question(models.Model):
 	"""
@@ -84,10 +133,15 @@ class Question(models.Model):
 	# 科目ID
 	subject = models.ForeignKey('Subject', default=1, on_delete=models.CASCADE)
 
+	# 创建时间
+	create_time = models.DateTimeField(auto_now_add=True)
+
 	# 类型ID
 	type = models.ForeignKey('QuestionType', default=1, on_delete=models.CASCADE)
 
 	for_test = models.BooleanField(default=False)
+
+	is_deleted = models.BooleanField(default=False)
 
 	def __str__(self):
 		
@@ -108,18 +162,25 @@ class Question(models.Model):
 	def convertToDict(self):
 
 		choices = []
+		pictures = []
+
 		choice_set = self.choice_set.all()
 		for choice in choice_set:
 			choices.append(choice.convertToDict())
 
+		picture_set = self.questionpicture_set.all()
+		for picture in picture_set:
+			pictures.append(picture.convertToBase64())
+
 		return {
-            'id' : self.id,
+            'id' : self.id-1,
             'title' : self.title,
             'description' : self.description,
             'level' : self.level,
             'score' : self.score, 
             'subjectId' : self.subject.id-1,
             'type' : self.type.id-1,
-            'choices' : choices
+            'choices' : choices,
+            'pictures' : pictures
         }
 

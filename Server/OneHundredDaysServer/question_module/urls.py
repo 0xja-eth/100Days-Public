@@ -21,14 +21,18 @@ from question_module import views
 
 urlpatterns = [
     path('query/id', views.query_id),
+    path('query/ids', views.query_ids),
     path('query/all', views.query_all),
     path('query/filter', views.query_filter),
+    path('query/count', views.query_count),
     path('generate/all', views.generate_all),
     path('generate/type', views.generate_type),
     path('generate/level', views.generate_level),
+    path('generate/exam', views.generate_exam),
 ]
 if settings.HTML_TEST:
     urlpatterns.extend([
+        path('test/load', views.test_load),
         path('test/randomly', views.test_randomly),
         path('test/delete', views.test_delete)
     ])

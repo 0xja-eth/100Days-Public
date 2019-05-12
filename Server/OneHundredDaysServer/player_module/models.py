@@ -1,30 +1,9 @@
 from django.db import models
 from django.conf import settings
-from django.utils.deconstruct import deconstructible
 from utils.exception import ErrorType, ErrorException
-import os, base64, json, time, random
+import os, json, time, datetime, random
 
 # Create your models here.
-@deconstructible
-class SavefileUpload:
-
-	def __init__(self, dir):
-		self.dir = dir
-
-	def __call__(self, instance, filename):
-		# 文件拓展名
-		ext = os.path.splitext(filename)[1]
-
-		# 定义文件名,用户id_年月日时分秒_随机数
-		currtime = time.strftime('%Y%m%d%H%M%S')
-		filename = "savefile_%s_%04d" % (currtime, random.randint(0, 9999))
-
-		# 保存路径
-		path = os.path.join(self.dir, filename+ext)
-
-		instance.save_changed = True
-
-		return path
 
 
 class School(models.Model):
@@ -32,7 +11,11 @@ class School(models.Model):
 	学校
 	"""
 	
-	name = models.CharField(max_length=20, unique=True, primary_key=False)
+	name = models.CharField(max_length=20, unique=False, primary_key=False)
+
+	create_time = models.DateTimeField(auto_now_add=True)
+
+	is_deleted = models.BooleanField(default=False)
 
 	def __str__(self):
 		return self.name
@@ -48,10 +31,10 @@ class QuestionRecordManager:
 		self.done_record.clear()
 		self.wrong_record.clear()
 
-		for rec in wrong_record:
+		for rec in wrong_record['list']:
 			self.wrong_record.append(int(rec))
 
-		for rec in done_record:
+		for rec in done_record['list']:
 			self.done_record.append(int(rec['id']))
 
 class Player(models.Model):
@@ -59,36 +42,52 @@ class Player(models.Model):
 	人物
 	"""
 
-	name = models.CharField(max_length=20, unique=True, primary_key=False)
+	name = models.CharField(max_length=20, unique=False, primary_key=False)
 
 	school = models.ForeignKey('School', null=False, on_delete=models.CASCADE)
 
-	savefile = models.FileField(upload_to=SavefileUpload('player'), null=True, blank=True)
+	#savefile = models.FileField(upload_to=SavefileUpload('player'), null=True, blank=True)
 	
+	save_data_text = models.TextField(null=True, blank=True)
+
+	create_time = models.DateTimeField(auto_now_add=True)
+
+	is_deleted = models.BooleanField(default=False)
+
 	def __init__(self, *args, **kwargs):
 
 		super(Player, self).__init__(*args, **kwargs)
-		self.save_changed = False
+		#self.save_changed = False
+		print ("init")
+		
 		self.save_data = None
 
 		self.question_records = QuestionRecordManager()
 
+		self.loadSaveData()
+
+		print ("save_data = "+str(self.save_data))
+
 	def __str__(self):
 		return self.name
 
+	"""
 	def getExactlyPath(self):
 
 		base = settings.STATIC_URL
 		path = os.path.join(base, str(self.savefile))
+
+		print(path)
 
 		if os.path.exists(path):
 			return path
 		else:
 			raise ErrorException(ErrorType.FileNotFound)
 
+	
 	def refresh(self):
 
-		self.getSavefileInfo()
+		self.makeSavefileInfo()
 
 	def getSavefileInfo(self):
 
@@ -101,29 +100,56 @@ class Player(models.Model):
 		salt = settings.SAVEFILE_SALT
 
 		with open(self.getExactlyPath(), 'rb') as f:
-			data = f.read()
+			data = f.read().decode()
 			data = data[len(salt):]
 			data = data.replace(salt,'')
 			data = base64.b64decode(data)
 
-		data = json.loads(data)
+		self.save_data_text = data
+
+	"""
+
+	def checkSaveData(self, data):
 
 		player = self.getPlayerInfo(data)
 
-		if 'name' in player and 'school' in player:
-			if player['name'] == self.name and player['school'] == self.school.name:
-				self.__refreshSaveData(data)
-			else:
-				raise ErrorException(ErrorType.PlayerDisMatch)
-		else:
+		name = self.__getField('name', player)
+		school = self.__getField('school', player)
+
+		print (name)
+		print (school)
+
+		print (self.name)
+		print (self.school.name)
+
+		if name != self.name or school != self.school.name:
+			raise ErrorException(ErrorType.PlayerDisMatch)
+		
+		return True
+
+	# 加载存档数据
+	def loadSaveData(self):
+
+		if self.save_data_text == None:
+			return
+
+		try:
+			data = json.loads(self.save_data_text)
+		except:
 			raise ErrorException(ErrorType.SavefileError)
+
+		print ("loadSaveData: "+str(data))
+
+		if self.checkSaveData(data):
+			self.__refreshSaveData(data)
 
 	def __getField(self, field, data=None):
 
-		if data == None and self.save_data != None: 
-			data = self.save_data
-		else:
-			raise ErrorException(ErrorType.NoSavefileInfo)
+		if data == None: 
+			if self.save_data != None: 
+				data = self.save_data
+			else:
+				raise ErrorException(ErrorType.NoSavefileInfo)
 
 		if field in data:
 			return data[field]
@@ -132,6 +158,7 @@ class Player(models.Model):
 	def __refreshSaveData(self, data):
 
 		self.save_data = data
+
 		self.question_records.refresh(
 			self.getQuestionRecordInfo(),
 			self.getQuestionWrongInfo()
@@ -151,7 +178,13 @@ class Player(models.Model):
 
 	def getSubjectValue(self, sid):
 
-		return self.__getField('subjectParams', self.getPlayerInfo())[sid]
+		player_info = self.getPlayerInfo()
+		subject_sel = self.__getField('subjectSel', player_info)
+
+		if subject_sel==0: delta = 4 # 文科
+		if subject_sel==1: delta = 1 # 理科
+
+		return self.__getField('subjectParams', player_info)['list'][sid-delta]
 
 	def getRecordInfo(self, data=None):
 
@@ -167,5 +200,12 @@ class Player(models.Model):
 
 	def getSaveTimeInfo(self, data=None):
 
-		return datetime.strptime(self.__getField('curTime', data),"%d/%m/%Y %I:%M:%S %p")
+		return datetime.strptime(self.__getField('curTime', data),
+			"%d/%m/%Y %H:%M:%S")
+
+	def getSaveTimeInfoForAdmin(self):
+		if self.save_data_text == None:
+			return '无存档信息'
+		else:
+			return self.__getField('curTime', None)
 

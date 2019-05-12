@@ -109,7 +109,7 @@ public class AnswerLayer : QuestionDisplayer {
             case "Exercise":
                 quesCount = exercise.getQuestionCount();
                 for (int i = 0; i < quesCount; i++)
-                    questions.Add(exercise.getQuestion(i));
+                    questions.Add(exercise.getQuestionObject(i));
                 break;
             case "ExamSet":
                 quesCount = 0;
@@ -117,7 +117,7 @@ public class AnswerLayer : QuestionDisplayer {
                     Exam exam = examSet.getExamById(i);
                     int cnt = exam.getQuestionCount();
                     for (int j = 0; j < cnt; j++)
-                        questions.Add(exam.getQuestion(j));
+                        questions.Add(exam.getQuestionObject(j));
                     quesCount += cnt;
                 }
                 break;
@@ -131,7 +131,9 @@ public class AnswerLayer : QuestionDisplayer {
 
     void drawQuestionMain() {
         Question q = curQuestion(); // exercise.getQuestion(quesPointer);
-        LinkImageText queText = GameUtils.get<LinkImageText>(question);
+        TextExtend queText = GameUtils.get<TextExtend>(question);
+
+        GameUtils.setTexturePool(q.getPictures());
 
         if (mode == "ExamSet") {
             Exam exam = examSet.getExam(q.getSubjectId());
@@ -139,12 +141,12 @@ public class AnswerLayer : QuestionDisplayer {
             score.text = "总分 " + exam.getFinalScore() + "/" + exam.getMaxScore();
         }
         title.text = "参考答案-" + getSubjectText(q);
-        queText.text = getQuestionTextInAnswer(quesPointer, q);
+        queText.text = getQuestionTextInAnswer(quesPointer, q, queText.fontSize);
     }
     void drawQuestionDescription() {
         Question q = curQuestion();
-        LinkImageText queText = GameUtils.get<LinkImageText>(question);
-
+        TextExtend queText = GameUtils.get<TextExtend>(question);
+        
         int[] sels = null;
         switch (mode) {
             case "Exercise":
@@ -155,7 +157,7 @@ public class AnswerLayer : QuestionDisplayer {
                 sels = exam.getSelections(q);
                 break;
         }
-        queText.text += getDescriptionText(quesPointer, q, sels);
+        queText.text += getDescriptionText(q, sels);
     }
     void drawQuestionStat() {
         Question q = curQuestion();
